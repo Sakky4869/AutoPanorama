@@ -60,9 +60,13 @@
     <!-- パノラマ空間を作るためのThree.jsライブラリ -->
     <script src="./js/three.min.js"></script>
 
+    <script src="./js/OrbitControls.js"></script>
+
     <!-- パノラマ空間を初期化するスクリプト -->
     <script src="./js/panorama_world.js"></script>
 
-
+    <script>
+        init();
+    </script>
 </body>
 </html>

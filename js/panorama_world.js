@@ -19,6 +19,17 @@ var camera = new THREE.PerspectiveCamera();
 var renderer = new THREE.WebGLRenderer();
 
 /**
+ * 描画結果のHTML要素
+ */
+var renderElement;
+
+/**
+ * デバイスの制御クラスのインスタンス
+ * デバイスによってクラスが異なる
+ */
+var controls;
+
+/**
  * パノラマ画像のURLとアノテーションデータの配列で，
  * パノラマ空間を初期化する
  * @param {string} panoramaUrl パノラマ画像のURL
@@ -31,6 +42,21 @@ function init(panoramaUrl, annotationDatas){
 
     // レンダラーを初期化
     initRenderer();
+
+    // 使用デバイスを判定
+    let isAndroidOrIOS = checkIsAndroidOrIOS();
+
+    // AndroidかiOSのとき
+    if(isAndroidOrIOS){
+        console.log('Android or iOS');
+        window.addEventListener('deviceorientation', setOrientationControls, true);
+    }
+    // PCのとき
+    else{
+        setOrbitControlsWithPC();
+    }
+
+    // 画面がリサイズしたときの処理
 }
 
 /**
@@ -102,14 +128,85 @@ function initRenderer(){
     renderer.physicallyCorrectLights = true;
 
     // 描画用要素
-    let element = renderer.domElement;
+    renderElement = renderer.domElement;
 
     // HTMLの要素に描画用要素を入れる
-    $('#stage').append(element);
+    $('#stage').append(renderElement);
 
     // 描画先を設定して描画
     renderer.render(scene, camera);
 }
+
+/**
+ * 使用デバイスがAndroidかiOSのときtrue
+ * それ以外はfalse
+ * @returns AndroidかiOSならtrue
+ */
+function checkIsAndroidOrIOS(){
+
+    // Android
+    if(navigator.userAgent.indexOf('Android') != -1){
+        return true;
+    }
+
+    // iOS
+    if(/(iPad|iPhone|iPod)/g.test(navigator.userAgent)){
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * PCのときにドラッグで視点を操作できるようにする
+ */
+function setOrbitControlsWithPC(){
+
+    // 制御クラスのインスタンスを初期化
+    controls = new THREE.OrbitControls(camera, renderElement);
+
+    // 視点操作のイージングをONにする
+    controls.enableDamping = true;
+
+    // 視点操作のイージングの値
+    controls.dumpingFactor = 0.3;
+
+    // 視点操作の速さ
+    controls.rotateSpeed = -0.3;
+
+    // ズーム禁止にする
+    controls.noZoom = true;
+
+    // ズーム速度を0にする（念のため）
+    controls.zoomSpeed = 0;
+
+    // パン操作禁止にする
+    controls.noPan = true;
+
+    controls.update();
+}
+
+function setOrientationControls(e){
+
+    console.log('setOrientationControls');
+
+    // スマホ以外なら何もしない
+    if(!e.alpha){
+        return;
+    }
+
+    console.log(e);
+
+    // スマホで制御するためのクラスのインスタンスを初期化
+    controls = new THREE.DeviceOrientationControls(camera, true);
+
+    controls.connect();
+
+    controls.update();
+
+    window.removeEventListener('deviceorientation', setOrientationControls, true);
+}
+
 
 /**
  * パノラマ画像をセットする
