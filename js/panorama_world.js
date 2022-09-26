@@ -3,6 +3,8 @@
  * 操作画面とパノラマ空間とのインタフェースもここで定義
  */
 
+// const { randInt } = require("three/src/math/MathUtils");
+
 /**
  * パノラマの空間を作るScene
  */
@@ -29,6 +31,8 @@ var renderElement;
  */
 var controls;
 
+var panoramaSphere;
+
 /**
  * パノラマ画像のURLとアノテーションデータの配列で，
  * パノラマ空間を初期化する
@@ -36,6 +40,11 @@ var controls;
  * @param {object} annotationDatas アノテーションデータの配列
  */
 function init(panoramaUrl, annotationDatas){
+
+    // scene = new THREE.Scene();
+    // camera = new THREE.PerspectiveCamera();
+    // renderer = new THREE.WebGLRenderer();
+
 
     // カメラを初期化
     initCamera();
@@ -58,7 +67,18 @@ function init(panoramaUrl, annotationDatas){
         setOrbitControlsWithPC();
     }
 
+    // パノラマを表示する球体を作成
+    panoramaSphere = createPanoramaSphere();
+
+    // パノラマ画像を貼り付け
+    setPanoramaImage(panoramaUrl);
+
+    // console.log(panoramaSphere.material);
+
     // 画面がリサイズしたときの処理
+
+
+    render();
 }
 
 /**
@@ -78,6 +98,7 @@ function initCamera(){
 
     // アスペクト比
     camera.aspect = window.innerWidth / window.innerHeight;
+    // console.log(camera.aspect, window.innerWidth, window.innerHeight);
 
     // 位置を原点付近にセット
     // 原点にすると，ドラッグで回転できなくなるので，若干ずらす
@@ -87,12 +108,11 @@ function initCamera(){
     camera.lookAt(0, 0, 0);
 
     // カメラの名前をセット
-    camera.name = 'camera';
+    camera.name = 'Camera';
 
     // 拡大・縮小処理を実装するため，
     // マウスホイールで視野角を変更できるようにする
     window.addEventListener('wheel', function(event){
-
         // 感度
         let sensi = 0.05;
         let diff = event.deltaY * sensi;
@@ -133,7 +153,7 @@ function initRenderer(){
     renderElement = renderer.domElement;
 
     // HTMLの要素に描画用要素を入れる
-    $('#stage').append(renderElement);
+    document.getElementById('stage').appendChild(renderElement);
 
     // 描画先を設定して描画
     renderer.render(scene, camera);
@@ -201,15 +221,54 @@ function setOrbitControlsWithPC(){
 // }
 
 
+function createPanoramaSphere(){
 
+    // 半径
+    let radius = 20;
+
+    // 球体
+    let sphereGeo = new THREE.SphereGeometry(radius, 360, 360);
+
+    sphereGeo.scale(-1, 1, 1);
+
+    let material = new THREE.MeshBasicMaterial({color: 'blue'});
+
+    let sphere = new THREE.Mesh(sphereGeo, material);
+
+    sphere.name = 'PanoramaSphere';
+    sphere.position.set(0, 0, 0);
+    sphere.rotation.set(0, 0 * Math.PI / 180, 0);
+
+    scene.add(sphere);
+
+    return sphere;
+
+}
+
+/**
+ * オブジェクトにテクスチャを貼り付ける
+ * @param {THREE.Object3D} targetObject テクスチャを貼り付けるオブジェクト
+ * @param {string} url 貼り付けるテクスチャ画像のURL
+ */
+function createMaterial(url){
+    let textureLoader = new THREE.TextureLoader();
+    let texture = textureLoader.load(url);
+    let material = new THREE.MeshBasicMaterial({
+        map: texture
+    });
+    return material;
+}
 
 /**
  * パノラマ画像をセットする
- * @param {THREE.Object3D} targetObject パノラマ画像を貼り付けるオブジェクト
  * @param {string} panoramaUrl パノラマ画像のURL
  */
-function setPanoramaImage(targetObject, panoramaUrl){
+function setPanoramaImage(panoramaUrl){
 
+    let material = createMaterial(panoramaUrl);
+    panoramaSphere.material = material;
+
+    // setTextureOnObject(panoramaSphere, panoramaUrl);
 }
 
 /**
@@ -243,5 +302,17 @@ function convertAnnotationPolarToCartesian(theta, phi){
  * すべてのアノテーションデータを削除する
  */
 function clearAnnotations(){
+
+}
+
+
+function render(){
+
+    // console.log('call render');
+
+    requestAnimationFrame(render);
+
+    renderer.render(scene, camera);
+    controls.update();
 
 }
