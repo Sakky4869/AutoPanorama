@@ -63,5 +63,6 @@
     <!-- パノラマ空間を初期化するスクリプト -->
     <script src="./js/panorama_world.js"></script>
 
+
 </body>
 </html>

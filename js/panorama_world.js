@@ -8,11 +8,15 @@
  */
 var scene = new THREE.Scene();
 
+/**
+ * 描画を行うカメラ
+ */
+var camera = new THREE.PerspectiveCamera();
 
 /**
  * 描画機能クラスのインスタンス
  */
-var renderer;// = new THREE.WebGLRenderer();
+var renderer = new THREE.WebGLRenderer();
 
 /**
  * パノラマ画像のURLとアノテーションデータの配列で，
@@ -23,12 +27,10 @@ var renderer;// = new THREE.WebGLRenderer();
 function init(panoramaUrl, annotationDatas){
 
     // カメラを初期化
-    let camera = initCamera();
+    initCamera();
 
-    // シーンにカメラを追加
-    scene.add(camera);
-
-
+    // レンダラーを初期化
+    initRenderer();
 }
 
 /**
@@ -36,9 +38,6 @@ function init(panoramaUrl, annotationDatas){
  * @returns カメラ
  */
 function initCamera(){
-
-    // カメラ
-    let camera = new THREE.PerspectiveCamera();
 
     // 視野角
     camera.fov = 75;
@@ -82,13 +81,34 @@ function initCamera(){
         camera.updateProjectionMatrix();
     });
 
-    return camera;
-
+    // シーンにカメラを追加
+    scene.add(camera);
 }
 
-
+/**
+ * 描画するためのrendererを初期化
+ */
 function initRenderer(){
 
+    // アンチエイリアシングをONにする
+    renderer.antialias = true;
+
+    // サイズ設定
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    // 背景色設定
+    renderer.setClearColor({color: 0x000000});
+
+    renderer.physicallyCorrectLights = true;
+
+    // 描画用要素
+    let element = renderer.domElement;
+
+    // HTMLの要素に描画用要素を入れる
+    $('#stage').append(element);
+
+    // 描画先を設定して描画
+    renderer.render(scene, camera);
 }
 
 /**
