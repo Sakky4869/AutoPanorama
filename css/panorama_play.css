@@ -1,0 +1,40 @@
+
+/* アノテーション追加画面への移動ボタン */
+#add-annotation-button{
+    position: absolute;
+    /* top: 0%; */
+    bottom: 2%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    border: none;
+    background-color: white;
+    font-size: 80px;
+    box-shadow: 0px 3px 3px 2px #6f6f6f66;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ボタンの十字線のパーツ */
+.add-annotation-mark-parts{
+    width: 40px;
+    height: 5px;
+    background-color: black;
+    position: absolute;
+}
+
+/* 縦線パーツ */
+.mark-ver{
+    transform: rotateZ(90deg);
+}
+
+/* 横線パーツ */
+.mark-hor{
+    transform: rotateZ(0deg);
+}
