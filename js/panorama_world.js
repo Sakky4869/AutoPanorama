@@ -48,8 +48,10 @@ function init(panoramaUrl, annotationDatas){
 
     // AndroidかiOSのとき
     if(isAndroidOrIOS){
-        console.log('Android or iOS');
-        window.addEventListener('deviceorientation', setOrientationControls, true);
+        // setOrbitControlsWithSmartphone();
+        // スマホのときにジャイロで操作させようとしたが，Threejsが無効化したらしい
+        // 一応PCと同じ設定で，指のドラッグで動作した
+        setOrbitControlsWithPC();
     }
     // PCのとき
     else{
@@ -158,7 +160,7 @@ function checkIsAndroidOrIOS(){
 }
 
 /**
- * PCのときにドラッグで視点を操作できるようにする
+ * ドラッグで視点を操作できるようにする
  */
 function setOrbitControlsWithPC(){
 
@@ -186,26 +188,19 @@ function setOrbitControlsWithPC(){
     controls.update();
 }
 
-function setOrientationControls(e){
+// function setOrbitControlsWithSmartphone(){
 
-    console.log('setOrientationControls');
+//     window.addEventListener('click', function(event){
+//         console.log('タップ X : ' + event.clientX + ', Y : ' + event.clientY);
+//     });
 
-    // スマホ以外なら何もしない
-    if(!e.alpha){
-        return;
-    }
+//     window.addEventListener('touchmove', function(event){
+//         // event.preventDefault();
+//         console.log('ドラッグ X : ' + event.touches[0].pageX + ', Y : ' + event.touches[0].pageY);
+//     });
+// }
 
-    console.log(e);
 
-    // スマホで制御するためのクラスのインスタンスを初期化
-    controls = new THREE.DeviceOrientationControls(camera, true);
-
-    controls.connect();
-
-    controls.update();
-
-    window.removeEventListener('deviceorientation', setOrientationControls, true);
-}
 
 
 /**
