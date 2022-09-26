@@ -1,0 +1,10 @@
+/* フォントをRobotoに設定 */
+body {
+    font-family: 'Roboto', sans-serif;
+    color: #363636;
+}
+
+/* Bootstrapの黒色を若干変更 */
+.bg-dark{
+    background-color: #363636!important;
+}
