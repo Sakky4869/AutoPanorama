@@ -50,6 +50,34 @@
         <div class="add-annotation-mark-parts mark-hor"></div>
     </button>
 
+
+    <!-- JQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+
+    <!-- Bootstra JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+    <!-- パノラマ空間を作るためのThree.jsライブラリ -->
+    <script src="./js/three.min.js"></script>
+
+    <script src="./js/OrbitControls.js"></script>
+
+    <!-- パノラマ空間を初期化するスクリプト -->
+    <script src="./js/panorama_world.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            // 臨時のアノテーションデータを作成
+            let annotationDatas = {
+                'datas': [
+                    { 'annotation-id' : "2022-09-08_17-33-00",'theta' : 1.87, 'phi' : 3.10,
+                        'annotation-url' : "./annotation_imgs/2022-09-18_17-33-00.jpg"},
+                ]
+            };
+
+            init('./panorama_imgs/2022-09-08_17-33-00/origin.jpg', annotationDatas);
+        });
+    </script>
 </body>
 </html>

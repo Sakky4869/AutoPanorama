@@ -1,4 +1,9 @@
 
+#stage{
+    touch-action: none;
+}
+
+
 /* アノテーション追加画面への移動ボタン */
 #add-annotation-button{
     position: absolute;

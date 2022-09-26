@@ -10,3 +10,8 @@
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+# パノラマ関係のディレクトリ
+panorama_imgs/*
+annotation_imgs/*
+candidate_imgs/*
