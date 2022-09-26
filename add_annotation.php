@@ -43,9 +43,45 @@
         </div>
     </nav>
 
-    <div id="video-area">
-        <video autoplay muted playsinline id="camera-video"></video>
+    <!-- videoとボタン関係を入れるcontent -->
+    <div class="container-fluid" id="content">
+
+        <!-- ビデオの親 -->
+        <div id="video-area">
+
+            <!-- カメラを表示するvideo -->
+            <video autoplay muted playsinline id="camera-video"></video>
+
+            <!-- ガイド枠 -->
+            <!-- 表示方法をよく調べる必要あり -->
+            <!-- position: absolute;以外でなんとかする方法を調べたい -->
+            <!-- <div id="guide-box"></div> -->
+        </div>
+
+        <div id="button-area">
+            <div class="action-button" id="retake-button">
+                <img class="icon" src="./imgs/retake_picture_icon.svg" alt="">
+                <p class="icon-text">取り直す</p>
+            </div>
+
+            <div class="action-button" id="send-button">
+                <img class="icon" src="./imgs/send_icon.svg" alt="">
+                <p class="icon-text">送る</p>
+            </div>
+
+            <div class="action-button" id="take-button">
+                <img class="icon" src="./imgs/take_picture_icon.svg" alt="">
+                <p class="icon-text">撮影</p>
+            </div>
+
+            <div class="action-button" id="help-button">
+                <img class="icon" src="./imgs/question_mark_white_in_black.svg" alt="">
+                <p class="icon-text">ヘルプ</p>
+            </div>
+        </div>
+
     </div>
+
 
 
     <!-- JQuery -->
@@ -57,21 +93,37 @@
         $(document).ready(async function() {
 
             try {
-                const video = $('#video'); // document.querySelector('#video') // <1>
+                const video = $('#camera-video'); // document.querySelector('#video') // <1>
 
-                const stream = await navigator.mediaDevices.getUserMedia({ // <2>
+                const options = {
                     video: {
-                        facingMode: 'user',
                         // facingMode: 'environment',
+                        facingMode: 'front',
+                        width: {
+                            min: 0,
+                            ideal: 2250,
+                            max: 2250
+                        },
+                        height: {
+                            min: 0,
+                            ideal: 4000,
+                            max: 4000
+                        },
+                        aspectRatio: {
+                            exact: 4000 / 2250
+                        }
                     },
                     audio: false,
-                });
+                };
+
+                const stream = await navigator.mediaDevices.getUserMedia(options);
 
                 video[0].srcObject = stream;
 
                 const [track] = stream.getVideoTracks();
+
                 const settings = track.getSettings();
-                console.log('setting', settings);
+                // console.log('setting', settings);
                 const {
                     width,
                     height

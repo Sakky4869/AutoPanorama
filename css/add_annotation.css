@@ -1,0 +1,103 @@
+body{
+    background-color: #363636;
+}
+
+nav{
+    box-shadow: 1px 1px 2px 0px #141414;
+}
+
+/* videoとボタン関係を入れるcontent */
+#content{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ビデオの親 */
+#video-area{
+    margin-top: 20px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* カメラを表示するvideo */
+#camera-video{
+    max-width: 80%;
+}
+
+/* 撮影時のガイド枠 */
+#guide-box{
+    /* width: 60%; */
+    width: 250px;
+    height: 450px;
+
+    position: absolute;
+    /* top: 5%; */
+    /* left: 50%; */
+    /* transform: translate(-50%, 0%);
+    -webkit-transform: translate(-50%, 0%);
+    -ms-transform: translate(-50%, 0%); */
+    background-color: rgba(255, 255, 255, 0.0);
+    /* border: white; */
+    border: 5px white;
+    /* z-index: 1; */
+}
+
+/* ボタンを表示するエリア */
+#button-area{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    width: 80%;
+    height: 10px;
+    font-size: smaller;
+}
+
+/* ボタンの共通クラス */
+.action-button{
+    position: absolute;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+/* ボタンの画像の共通クラス */
+.icon{
+    height: 50px;
+    margin-bottom: 3px;
+}
+
+/* 撮影ボタン */
+#take-button{
+    left: 50%;
+    transform: translate(-50%, 0%);
+    -webkit-transform: translate(-50%, 0%);
+    -ms-transform: translate(-50%, 0%);
+}
+
+/* 送信ボタン */
+#send-button{
+    left: 50%;
+    transform: translate(-50%, 0%);
+    -webkit-transform: translate(-50%, 0%);
+    -ms-transform: translate(-50%, 0%);
+    visibility: hidden;
+}
+
+/* 取り直しボタン */
+#retake-button{
+    left: 10%;
+    transform: translate(10%, 0%);
+    -webkit-transform: translate(10%, 0%);
+    -ms-transform: translate(10%, 0%);
+}
+
+/* ヘルプボタン */
+#help-button{
+    right: 10%;
+    transform: translate(-20%, 0%);
+    -webkit-transform: translate(-20%, 0%);
+    -ms-transform: translate(-20%, 0%);
+}
