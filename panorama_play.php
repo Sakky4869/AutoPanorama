@@ -70,8 +70,8 @@
 
             // 臨時のアノテーションデータを作成
             let annotationDatas = {
-                datas: [
-                    { 'annotaton-id' : "2022-09-08_17-33-00",'theta' : 1.87, 'phi' : 3.10,
+                'datas': [
+                    { 'annotation-id' : "2022-09-08_17-33-00",'theta' : 1.87, 'phi' : 3.10,
                         'annotation-url' : "./annotation_imgs/2022-09-18_17-33-00.jpg"},
                 ]
             };

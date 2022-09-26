@@ -39,7 +39,7 @@ var panoramaSphere;
  * @param {string} panoramaUrl パノラマ画像のURL
  * @param {object} annotationDatas アノテーションデータの配列
  */
-function init(panoramaUrl, annotationDatas){
+function init(panoramaUrl, annotationDatas) {
 
     // scene = new THREE.Scene();
     // camera = new THREE.PerspectiveCamera();
@@ -56,14 +56,14 @@ function init(panoramaUrl, annotationDatas){
     let isAndroidOrIOS = checkIsAndroidOrIOS();
 
     // AndroidかiOSのとき
-    if(isAndroidOrIOS){
+    if (isAndroidOrIOS) {
         // setOrbitControlsWithSmartphone();
         // スマホのときにジャイロで操作させようとしたが，Threejsが無効化したらしい
         // 一応PCと同じ設定で，指のドラッグで動作した
         setOrbitControlsWithPC();
     }
     // PCのとき
-    else{
+    else {
         setOrbitControlsWithPC();
     }
 
@@ -73,10 +73,11 @@ function init(panoramaUrl, annotationDatas){
     // パノラマ画像を貼り付け
     setPanoramaImage(panoramaUrl);
 
-    // console.log(panoramaSphere.material);
+    // アノテーションデータからアノテーションを生成
+    setAnnotations(annotationDatas);
 
     // 画面がリサイズしたときの処理
-
+    window.addEventListener('resize', handleResize, false);
 
     render();
 }
@@ -85,7 +86,7 @@ function init(panoramaUrl, annotationDatas){
  * カメラを初期化し，カメラのオブジェクトを返す
  * @returns カメラ
  */
-function initCamera(){
+function initCamera() {
 
     // 視野角
     camera.fov = 75;
@@ -112,7 +113,7 @@ function initCamera(){
 
     // 拡大・縮小処理を実装するため，
     // マウスホイールで視野角を変更できるようにする
-    window.addEventListener('wheel', function(event){
+    window.addEventListener('wheel', function (event) {
         // 感度
         let sensi = 0.05;
         let diff = event.deltaY * sensi;
@@ -120,7 +121,7 @@ function initCamera(){
         camera.fov += diff;
 
         // 拡大縮小の限度を設定
-        if(camera.fov <= 0 || camera.fov >= 120){
+        if (camera.fov <= 0 || camera.fov >= 120) {
             camera.fov = fovBefore;
             return;
         }
@@ -129,6 +130,9 @@ function initCamera(){
         camera.updateProjectionMatrix();
     });
 
+
+    camera.updateProjectionMatrix();
+
     // シーンにカメラを追加
     scene.add(camera);
 }
@@ -136,7 +140,7 @@ function initCamera(){
 /**
  * 描画するためのrendererを初期化
  */
-function initRenderer(){
+function initRenderer() {
 
     // アンチエイリアシングをONにする
     renderer.antialias = true;
@@ -145,7 +149,7 @@ function initRenderer(){
     renderer.setSize(window.innerWidth, window.innerHeight);
 
     // 背景色設定
-    renderer.setClearColor({color: 0x000000});
+    renderer.setClearColor({ color: 0x000000 });
 
     renderer.physicallyCorrectLights = true;
 
@@ -164,15 +168,15 @@ function initRenderer(){
  * それ以外はfalse
  * @returns AndroidかiOSならtrue
  */
-function checkIsAndroidOrIOS(){
+function checkIsAndroidOrIOS() {
 
     // Android
-    if(navigator.userAgent.indexOf('Android') != -1){
+    if (navigator.userAgent.indexOf('Android') != -1) {
         return true;
     }
 
     // iOS
-    if(/(iPad|iPhone|iPod)/g.test(navigator.userAgent)){
+    if (/(iPad|iPhone|iPod)/g.test(navigator.userAgent)) {
         return true;
     }
 
@@ -182,7 +186,7 @@ function checkIsAndroidOrIOS(){
 /**
  * ドラッグで視点を操作できるようにする
  */
-function setOrbitControlsWithPC(){
+function setOrbitControlsWithPC() {
 
     // 制御クラスのインスタンスを初期化
     controls = new THREE.OrbitControls(camera, renderElement);
@@ -221,7 +225,7 @@ function setOrbitControlsWithPC(){
 // }
 
 
-function createPanoramaSphere(){
+function createPanoramaSphere() {
 
     // 半径
     let radius = 20;
@@ -231,7 +235,7 @@ function createPanoramaSphere(){
 
     sphereGeo.scale(-1, 1, 1);
 
-    let material = new THREE.MeshBasicMaterial({color: 'blue'});
+    let material = new THREE.MeshBasicMaterial({ color: 'blue' });
 
     let sphere = new THREE.Mesh(sphereGeo, material);
 
@@ -250,7 +254,7 @@ function createPanoramaSphere(){
  * @param {THREE.Object3D} targetObject テクスチャを貼り付けるオブジェクト
  * @param {string} url 貼り付けるテクスチャ画像のURL
  */
-function createMaterial(url){
+function createMaterial(url) {
     let textureLoader = new THREE.TextureLoader();
     let texture = textureLoader.load(url);
     let material = new THREE.MeshBasicMaterial({
@@ -263,7 +267,7 @@ function createMaterial(url){
  * パノラマ画像をセットする
  * @param {string} panoramaUrl パノラマ画像のURL
  */
-function setPanoramaImage(panoramaUrl){
+function setPanoramaImage(panoramaUrl) {
 
     let material = createMaterial(panoramaUrl);
     panoramaSphere.material = material;
@@ -276,8 +280,11 @@ function setPanoramaImage(panoramaUrl){
  * ここでは，画像データ以外も扱う
  * @param {object} annotationDatas アノテーションデータの配列
  */
-function setAnnotations(annotationDatas){
-
+function setAnnotations(annotationDatas) {
+    let datas = annotationDatas['datas'];
+    for(let i = 0; i < datas.length; i++){
+        setAnnotation(datas[i]);
+    }
 }
 
 /**
@@ -285,28 +292,67 @@ function setAnnotations(annotationDatas){
  * 実際に配置するのはここ
  * @param {object} annotationData アノテーションデータ
  */
-function setAnnotation(annotationData){
+function setAnnotation(annotationData) {
 
+    let annotationID = annotationData['annotation-id'];
+    let theta = parseFloat(annotationData['theta']);
+    let phi = parseFloat(annotationData['phi']);
+    let annotationUrl = annotationData['annotation-url'];
+
+    // アノテーションに使用するマテリアルを作成
+    let annotationMaterial = createMaterial('./imgs/annotation_photo.jpg');
+
+    // アノテーションの箱を作成
+    let annotationBoxGeometry = new THREE.BoxGeometry(2, 2, 2, 10, 10, 10);
+    let annotationBox = new THREE.Mesh(annotationBoxGeometry, annotationMaterial);
+
+
+    let positions = convertAnnotationPolarToCartesian(theta, phi);
+
+    annotationBox.position.set(positions[0], positions[2], positions[1]);
+
+    annotationBox.lookAt(camera.position);
+    annotationBox.name = 'annotation,' + annotationID + ',' + annotationUrl;
+    annotationBox.material.transparent = true;
+    annotationBox.material.alphaToCoverage = true;
+    annotationBox.material.opacity = 1;
+    scene.add(annotationBox);
 }
 
 /**
  * 極座標を，パノラマ空間の直交座標に変換する
  * @param {float} theta 極座標のθ
  * @param {float} phi 極座標のφ
+ * @returns [ posX, posY, posZ]
  */
-function convertAnnotationPolarToCartesian(theta, phi){
-
+function convertAnnotationPolarToCartesian(theta, phi) {
+    let radius = 20;
+    let posX = radius * Math.sin(theta) * Math.cos(phi);
+    let posY = radius * Math.sin(theta) * Math.sin(phi);
+    let posZ = radius * Math.cos(theta);
+    return [posX, posY, posZ];
 }
 
 /**
  * すべてのアノテーションデータを削除する
  */
-function clearAnnotations(){
+function clearAnnotations() {
 
 }
 
+/**
+ * 画面がリサイズされたときの処理
+ */
+function handleResize() {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+}
 
-function render(){
+/**
+ * 描画関数
+ */
+function render() {
 
     // console.log('call render');
 
