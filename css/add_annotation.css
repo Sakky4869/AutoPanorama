@@ -27,6 +27,16 @@ nav{
     max-width: 80%;
 }
 
+#camera-canvas{
+    max-width: 80%;
+    display: none;
+}
+
+#camera-image{
+    max-width: 80%;
+    display: none;
+}
+
 /* 撮影時のガイド枠 */
 #guide-box{
     /* width: 60%; */
@@ -101,3 +111,34 @@ nav{
     -webkit-transform: translate(-20%, 0%);
     -ms-transform: translate(-20%, 0%);
 }
+
+/* ---- デバッグ専用 ---- */
+#debug-area{
+    color: white;
+    display: flex;
+    flex-direction: column;
+
+    margin-top: 100px;
+}
+
+.debug-row{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.debug-row p{
+    margin-left: 30px;
+}
+
+.item-title{
+    margin-left: 10%;
+}
+
+.item-value{
+    margin-right: 10%;
+}
+
+/* #permit{
+    display: none;
+} */

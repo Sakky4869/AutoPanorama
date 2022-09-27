@@ -52,6 +52,11 @@
             <!-- カメラを表示するvideo -->
             <video autoplay muted playsinline id="camera-video"></video>
 
+            <!-- 撮影データを画像化するために，一時的に撮影データを格納する -->
+            <canvas id="camera-canvas"></canvas>
+
+            <!-- 撮影結果を表示するimg -->
+            <img id="camera-image" src="" alt="">
             <!-- ガイド枠 -->
             <!-- 表示方法をよく調べる必要あり -->
             <!-- position: absolute;以外でなんとかする方法を調べたい -->
@@ -80,6 +85,29 @@
             </div>
         </div>
 
+        <div id="debug-area">
+            <div class="debug-row">
+                <p class="item-title" id="direction">direction：</p>
+                <p class="item-value" id="direction-value"></p>
+            </div>
+            <div class="debug-row">
+                <p class="item-title" id="absolute">absolute：</p>
+                <p class="item-value" id="absolute-value"></p>
+            </div>
+            <div class="debug-row">
+                <p class="item-title" id="alpha">alpha：</p>
+                <p class="item-value" id="alpha-value"></p>
+            </div>
+            <div class="debug-row">
+                <p class="item-title" id="beta">beta：</p>
+                <p class="item-value" id="beta-value"></p>
+            </div>
+            <div class="debug-row">
+                <p class="item-title" id="ganma">ganma：</p>
+                <p class="item-value" id="ganma-value"></p>
+            </div>
+        </div>
+
     </div>
 
 
@@ -87,55 +115,16 @@
     <!-- JQuery -->
     <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
 
+    <!-- 日付取得 -->
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+
     <!-- アノテーション追加画面の機能のスクリプト -->
     <script src="./js/add_annotation.js"></script>
 
     <!-- 画面作成の際，カメラからの映像取得を確認するため，臨時のスクリプトを作成 -->
     <script>
         $(document).ready(async function() {
-            init();
-            return;
-            try {
-                const video = $('#camera-video'); // document.querySelector('#video') // <1>
-
-                const options = {
-                    video: {
-                        // facingMode: 'environment',
-                        facingMode: 'front',
-                        width: {
-                            min: 0,
-                            ideal: 2250,
-                            max: 2250
-                        },
-                        height: {
-                            min: 0,
-                            ideal: 4000,
-                            max: 4000
-                        },
-                        aspectRatio: {
-                            exact: 4000 / 2250
-                        }
-                    },
-                    audio: false,
-                };
-
-                const stream = await navigator.mediaDevices.getUserMedia(options);
-
-                video[0].srcObject = stream;
-
-                const [track] = stream.getVideoTracks();
-
-                const settings = track.getSettings();
-                // console.log('setting', settings);
-                const {
-                    width,
-                    height
-                } = settings;
-                // console.log('width', width, 'height', height);
-
-            } catch (err) {
-                console.error(err);
-            }
+            await init();
         });
     </script>
 
