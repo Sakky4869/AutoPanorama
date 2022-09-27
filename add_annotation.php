@@ -87,11 +87,14 @@
     <!-- JQuery -->
     <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
 
+    <!-- アノテーション追加画面の機能のスクリプト -->
+    <script src="./js/add_annotation.js"></script>
 
     <!-- 画面作成の際，カメラからの映像取得を確認するため，臨時のスクリプトを作成 -->
     <script>
         $(document).ready(async function() {
-
+            init();
+            return;
             try {
                 const video = $('#camera-video'); // document.querySelector('#video') // <1>
 
