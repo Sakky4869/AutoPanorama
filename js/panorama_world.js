@@ -41,11 +41,6 @@ var panoramaSphere;
  */
 function init(panoramaUrl, annotationDatas) {
 
-    // scene = new THREE.Scene();
-    // camera = new THREE.PerspectiveCamera();
-    // renderer = new THREE.WebGLRenderer();
-
-
     // カメラを初期化
     initCamera();
 
@@ -71,7 +66,7 @@ function init(panoramaUrl, annotationDatas) {
     panoramaSphere = createPanoramaSphere();
 
     // パノラマ画像を貼り付け
-    setPanoramaImage(panoramaUrl);
+    // setPanoramaImage(panoramaUrl);
 
     // アノテーションデータからアノテーションを生成
     setAnnotations(annotationDatas);
@@ -157,7 +152,7 @@ function initRenderer() {
     renderElement = renderer.domElement;
 
     // HTMLの要素に描画用要素を入れる
-    document.getElementById('stage').appendChild(renderElement);
+    document.getElementById('panorama-world').appendChild(renderElement);
 
     // 描画先を設定して描画
     renderer.render(scene, camera);
@@ -235,7 +230,7 @@ function createPanoramaSphere() {
 
     sphereGeo.scale(-1, 1, 1);
 
-    let material = new THREE.MeshBasicMaterial({ color: 'blue' });
+    let material = new THREE.MeshBasicMaterial({ color: 'black' });
 
     let sphere = new THREE.Mesh(sphereGeo, material);
 
