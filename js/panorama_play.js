@@ -17,11 +17,12 @@ function getPanoramaID(){
  * @param {string} panoramaID パノラマID
  * @returns パノラマのオリジナル画像のURL
  */
-function getPanoramaOriginUul(panoramaID){
+function getPanoramaOriginUrl(panoramaID){
 
     // 2022/09/27
     // サーバサイドが未開発のため，臨時データをreturn
-    return './panorama_imgs/2022-09-08_17-33-00/origin.jpg';
+    // return './panorama_imgs/2022-09-08_17-33-00/origin.jpg';
+    return './panorama_imgs/2022-09-08_17-33-00/origin_min.jpg';
 
     $.ajax({
         type: 'POST',
@@ -70,8 +71,67 @@ function getAnnotationDatas(panoramaID){
     });
 }
 
-function showErrorMessage(msg, optMsg){
+/**
+ * パノラマ画像をダウンロードする
+ * 容量が大きいため，進捗を表示する
+ * @param {string} img 画像ファイルの名前
+ */
+function downloadPanoramaImage(img){
 
+    // プログレスバー取得
+    const progressBar = $('#download-progress');
+    const xhr = new XMLHttpRequest();
+
+    // プログレスバーの初期化
+    progressBar.css('width', '0%');
+    progressBar.html('0%');
+
+    xhr.open('GET', img);
+    xhr.responseType = 'blob';
+
+    // ダウンロード中の処理
+    xhr.onprogress = function(event){
+        let value = event.loaded / event.total * 100 | 0 + '%';
+        progressBar.css('width', value);
+        progressBar.html(value);
+    };
+
+    // ダウンロード完了時の処理
+    xhr.onreadystatechange = function(){
+        if(this.readyState == 4 && this.status == 200){
+            setPanoramaImage(URL.createObjectURL(this.response));
+            $('#loading-window').css('display', 'none');
+            $('#add-annotation-button').css('display', 'flex');
+        }
+    };
+
+    xhr.send();
+
+}
+
+/**
+ * エラーメッセージを表示する
+ * @param {string} msg エラーのメインメッセージ
+ * @param {string} optMsg エラーのオプションメッセージ
+ */
+function showErrorMessage(msg, optMsg){
+    const errorMainMsg = $('#error-main-message');
+    errorMainMsg.html(msg);
+
+    if(optMsg != null){
+        const errorOptMsg = $('#error-option-message');
+        errorOptMsg.html(optMsg);
+    }
+
+    if(msg == 'パノラマが見つかりませんでした'){
+        const errorActionButton = $('#error-action-button');
+        errorActionButton.css('display', 'inline');
+        errorActionButton.click(function (e) {
+            window.location.href = './panorama_preview.php';
+        });
+    }
+
+    $('#message-window').css('display', 'inline');
 }
 
 /**
@@ -79,5 +139,5 @@ function showErrorMessage(msg, optMsg){
  * @param {string} panoramaID パノラマID
  */
 function redirectToAnnotationPage(panoramaID){
-    window.location.href = '../add_annotation.php?panorama-id=' + panoramaID;
+    window.location.href = './add_annotation.php?panorama-id=' + panoramaID;
 }
