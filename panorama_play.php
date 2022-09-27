@@ -60,10 +60,14 @@
     <!-- パノラマ空間を作るためのThree.jsライブラリ -->
     <script src="./js/three.min.js"></script>
 
+    <!-- 視点操作のためのライブラリ -->
     <script src="./js/OrbitControls.js"></script>
 
     <!-- パノラマ空間を初期化するスクリプト -->
     <script src="./js/panorama_world.js"></script>
+
+    <!-- パノラマ画面の操作スクリプト -->
+    <script src="./js/panorama_play.js"></script>
 
     <script>
         $(document).ready(function () {
