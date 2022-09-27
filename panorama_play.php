@@ -42,7 +42,7 @@
     </nav>
 
     <!-- パノラマ空間を作成するステージ -->
-    <div id="stage"></div>
+    <div id="panorama-world"></div>
 
     <!-- アノテーション追加画面へ移動するボタン -->
     <button type="button" id="add-annotation-button">

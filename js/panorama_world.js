@@ -157,7 +157,7 @@ function initRenderer() {
     renderElement = renderer.domElement;
 
     // HTMLの要素に描画用要素を入れる
-    document.getElementById('stage').appendChild(renderElement);
+    document.getElementById('panorama-world').appendChild(renderElement);
 
     // 描画先を設定して描画
     renderer.render(scene, camera);
