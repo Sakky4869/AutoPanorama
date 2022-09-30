@@ -112,6 +112,64 @@ nav{
     -ms-transform: translate(-20%, 0%);
 }
 
+/* ---- アノテーション候補表示関係 ---- */
+
+/* 候補画像一覧を表示するエリア */
+#select-box-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5%;
+}
+
+/* グリッドの中の候補画像のcol */
+.candidate-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0%;
+}
+
+/* colに入れる画像 */
+.candidate-col img {
+    width: 100%;
+    padding: 5%;
+}
+
+/* 画像が選択された状態 */
+.candidate-col img[data-selected='true'] {
+    background-color: #0d6efd;
+}
+
+
+/* モーダルウィンドウを表示するボタン */
+/* JSからクリックさせるため，非表示にする */
+#open-candidate-modal-button{
+    display: none;
+}
+
+/* アノテーションの位置が決まったときに，OKマークを表示するエリア */
+#accept-annotation-mark-area{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    display: none;
+}
+
+#accept-annotation-mark{
+    width: 30%;
+}
+
+#annotation-modal-footer{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+
+
 /* ---- デバッグ専用 ---- */
 #debug-area{
     color: white;

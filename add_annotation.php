@@ -14,6 +14,7 @@
 
     <!-- プレビュー画面のCSSファイル -->
     <link rel="stylesheet" href="./css/add_annotation.css">
+    <!-- <link rel="stylesheet" href="./select_grid.css"> -->
 
     <!-- Robotoフォントを適用する設定 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -63,22 +64,29 @@
             <!-- <div id="guide-box"></div> -->
         </div>
 
+        <!-- ボタン関係を表示するdiv -->
         <div id="button-area">
+
+            <!-- 取り直しボタン -->
             <div class="action-button" id="retake-button">
                 <img class="icon" src="./imgs/retake_picture_icon.svg" alt="">
                 <p class="icon-text">取り直す</p>
             </div>
 
+            <!-- 送信ボタン -->
             <div class="action-button" id="send-button">
                 <img class="icon" src="./imgs/send_icon.svg" alt="">
                 <p class="icon-text">送る</p>
             </div>
 
+            <!-- 撮影ボタン -->
             <div class="action-button" id="take-button">
                 <img class="icon" src="./imgs/take_picture_icon.svg" alt="">
                 <p class="icon-text">撮影</p>
             </div>
 
+            <!-- ヘルプボタン -->
+            <!-- ガイドに沿って撮影するように促すコンテンツを表示する予定 -->
             <div class="action-button" id="help-button">
                 <img class="icon" src="./imgs/question_mark_white_in_black.svg" alt="">
                 <p class="icon-text">ヘルプ</p>
@@ -110,7 +118,38 @@
 
     </div>
 
+    <!-- モーダルウィンドウを表示するためのボタン -->
+    <!-- 非表示にして，JSからクリックする -->
+    <button id="open-candidate-modal-button" type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#candidate-modal"></button>
 
+    <!-- 候補表示用のモーダルウィンドウ -->
+    <!-- if you want to close by clicking outside the modal, delete the last endpoint:data-bs-backdrop and data-bs-keyboard -->
+    <div class="modal fade" id="candidate-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="candidate-modal-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="candidate-modal-title">撮影したものはどれ？</h5>
+                        <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
+                </div>
+                <div class="modal-body">
+
+                    <!-- 候補画像一覧を表示するエリア -->
+                    <div class="container-sm" id="select-box-area"></div>
+
+                    <!-- アノテーションの位置が決まったときに，OKマークを表示するエリア -->
+                    <div class="container-sm" id="accept-annotation-mark-area">
+                        <p>決定しました</p>
+                        <img  id="accept-annotation-mark" src="./imgs/accepted_icon.svg" alt="">
+                    </div>
+                </div>
+
+                <div id="annotation-modal-footer" class="modal-footer">
+                    <button  type="button" class="btn btn-secondary" data-bs-dismiss="modal">この中にはない</button>
+                    <button id="decide-annotation-button" type="button" class="btn btn-primary">決定</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- JQuery -->
     <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
@@ -125,6 +164,9 @@
     <script>
         $(document).ready(async function() {
             await init();
+
+            showCandidateAreasTest();
+
         });
     </script>
 

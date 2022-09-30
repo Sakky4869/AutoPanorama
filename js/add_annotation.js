@@ -232,6 +232,34 @@ function uploadAnnotation(annotation, direction, annotationID) {
 
     let panoramaID = getPanoramaID();
 
+    // サーバサイドが未開発のため，臨時データを用意
+    let response = {
+        'annotation-id': '2022-09-18_17-33-00', 'panorama-id': '2022-09-18_17-33-00',
+        'images' : [
+            {'index': '0', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+            'theta': 1.87, 'phi': 3.10},
+            {'index': '1', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+            'theta': 1.87, 'phi': 3.10},
+            {'index': '2', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+            'theta': 1.87, 'phi': 3.10},
+            {'index': '3', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+            'theta': 1.87, 'phi': 3.10},
+            {'index': '4', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+            'theta': 1.87, 'phi': 3.10},
+            {'index': '5', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+            'theta': 1.87, 'phi': 3.10},
+            {'index': '6', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+            'theta': 1.87, 'phi': 3.10},
+            {'index': '7', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+            'theta': 1.87, 'phi': 3.10},
+            {'index': '8', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+            'theta': 1.87, 'phi': 3.10},
+        ]
+    };
+
+    showCandidateAreas(response);
+
+    return;
     $.ajax({
         type: 'POST',
         url: './add_annotation.php',
@@ -248,9 +276,158 @@ function uploadAnnotation(annotation, direction, annotationID) {
     });
 }
 
+function showCandidateAreasTest(){
+    // サーバサイドが未開発のため，臨時データを用意
+    let response = {
+        'annotation-id': '2022-09-18_17-33-00', 'panorama-id': '2022-09-18_17-33-00',
+        'images' : [
+            {'index': '0', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+            'theta': 1.87, 'phi': 3.10},
+            {'index': '1', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+            'theta': 1.87, 'phi': 3.10},
+            {'index': '2', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+            'theta': 1.87, 'phi': 3.10},
+            {'index': '3', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+            'theta': 1.87, 'phi': 3.10},
+            {'index': '4', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+            'theta': 1.87, 'phi': 3.10},
+            {'index': '5', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+            'theta': 1.87, 'phi': 3.10},
+            {'index': '6', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+            'theta': 1.87, 'phi': 3.10},
+            {'index': '7', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+            'theta': 1.87, 'phi': 3.10},
+            {'index': '8', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+            'theta': 1.87, 'phi': 3.10},
+        ]
+    };
+
+    showCandidateAreas(response);
+}
+
 function showCandidateAreas(candidateDatas) {
 
+    // アノテーションIDを取得
+    let annotationID = candidateDatas['annotation-id'];
+
+    // パノラマIDを取得
+    let panoramaID = candidateDatas['panorama-id'];
+
+    // 候補画像リストを取得
+    let images = candidateDatas['images'];
+
+    // 候補画像一覧のグリッドを生成
+    createCandidateGrid(images);
+
+    // 候補画像を表示するモーダルウィンドウを表示
+    $('#open-candidate-modal-button').trigger('click');
+
+
 }
+
+function createCandidateGrid(images){
+
+    // 候補画像一覧を表示するdivを取得
+    const selectBoxArea = $('#select-box-area');
+
+    // グリッドのrow
+    let row = null;
+
+    for(let i_images = 0; i_images < images.length; i_images++){
+
+        // rowの先頭要素を生成するときには，rowも生成する
+        if(i_images % 3 == 0){
+            // rowにするdivを生成
+            row = document.createElement('div');
+
+            // 属性追加
+            row.setAttribute('class', 'row row-col-3');
+
+            // 表示エリアに追加
+            selectBoxArea.append(row);
+        }
+
+        // colを生成
+        const col = document.createElement('div');
+        col.setAttribute('class', 'col candidate-col');
+
+        // 候補画像のDataを取得
+        const imgData = images[i_images];
+
+        // img要素を生成
+        const imgEle = document.createElement('img');
+
+        // 属性セット
+        imgEle.setAttribute('src', imgData['url'] + '/' + i_images + '.png');
+        imgEle.setAttribute('class', 'candidate-img');
+        imgEle.setAttribute('data-selected', 'false');
+        imgEle.setAttribute('data-index', i_images);
+        imgEle.setAttribute('data-theta', imgData['theta']);
+        imgEle.setAttribute('data-phi', imgData['phi']);
+
+        imgEle.addEventListener('click', setSelectFunctionOnImgElement);
+
+        // img要素をcolにセット
+        col.appendChild(imgEle);
+
+        // colをrowにセット
+        row.appendChild(col);
+
+    }
+}
+
+function setSelectFunctionOnImgElement(event){
+
+    // すべての候補画像を取得
+    const candidateImages = $('.candidate-img');
+
+    // 候補画像の中で，すでに選択されているものを記録する変数
+    let selectedImage = null;
+
+    const dataKey = 'data-selected';
+
+    // すでに選択されているものを探す
+    for(let i_images = 0; i_images < candidateImages.length; i_images++){
+        if(candidateImages[i_images].getAttribute(dataKey) == 'true'){
+            selectedImage = candidateImages[i_images];
+            break;
+        }
+    }
+
+    // １つも選択されていなかった場合
+    if(selectedImage == null){
+
+        // 選択状態にする
+        event.target.setAttribute(dataKey, 'true');
+        return;
+    }
+
+    // どれかの要素が選択されていた場合
+
+    // 選択されていた要素と，クリックした要素が同一なら
+    if(selectedImage == event.target){
+
+        // 選択を解除
+        event.target.setAttribute(dataKey, 'false');
+    }
+    // 別要素なら
+    else{
+        // すでに選択されている要素の，選択状態を解除
+        selectedImage.setAttribute(dataKey, 'false');
+
+        // クリックされた要素を選択状態にする
+        event.target.setAttribute(dataKey, 'true');
+    }
+
+}
+
+/**
+ * 候補画像一覧のモーダルウィンドウを表示
+ */
+function showCandidateModal(){
+    $('#open-candidate-modal-button').trigger('click');
+}
+
 
 function decideAnnotation() {
 
