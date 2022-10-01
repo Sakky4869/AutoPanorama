@@ -9,10 +9,10 @@ class JsonManager{
      * 配列データをJSONに変換してecho
      *
      * @param array $data
-     * @return void
+     * @return string
      */
-    public function echo_json_response($array_data){
-        echo json_encode($array_data, JSON_UNESCAPED_UNICODE);
+    public function get_json_response($array_data){
+        return json_encode($array_data, JSON_UNESCAPED_UNICODE);
     }
 
     /**

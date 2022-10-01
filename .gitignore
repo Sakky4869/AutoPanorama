@@ -15,3 +15,6 @@
 panorama_imgs/*
 annotation_imgs/*
 candidate_imgs/*
+
+# ログファイル
+log.txt

@@ -276,7 +276,9 @@ function setPanoramaImage(panoramaUrl) {
  * @param {object} annotationDatas アノテーションデータの配列
  */
 function setAnnotations(annotationDatas) {
+    // console.log(annotationDatas);
     let datas = annotationDatas['datas'];
+    // console.log('datas', datas);
     for(let i = 0; i < datas.length; i++){
         setAnnotation(datas[i]);
     }
