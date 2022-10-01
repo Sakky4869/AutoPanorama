@@ -121,6 +121,11 @@
             // パノラマ画像をダウンロードして，パノラマ空間にセット
             downloadPanoramaImage(panoramaOriginUrl);
 
+            // ボタンを押したらアノテーション追加画面へ移動
+            $('#add-annotation-button').click(function(event){
+                redirectToAnnotationPage(panoramaID);
+            });
+
             // init('./panorama_imgs/2022-09-08_17-33-00/origin.jpg', annotationDatas);
         });
     </script>

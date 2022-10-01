@@ -27,6 +27,20 @@ nav{
     max-width: 80%;
 }
 
+/* 撮影データを画像化するために一時的に保存するcanvas */
+/* 基本的に非表示 */
+#camera-canvas{
+    /* max-width: 80%; */
+    display: none;
+}
+
+/* 撮影結果を表示するimg */
+/* 撮影したあとだけ表示 */
+#camera-image{
+    max-width: 80%;
+    display: none;
+}
+
 /* 撮影時のガイド枠 */
 #guide-box{
     /* width: 60%; */
@@ -101,3 +115,94 @@ nav{
     -webkit-transform: translate(-20%, 0%);
     -ms-transform: translate(-20%, 0%);
 }
+
+/* ---- アノテーション候補表示関係 ---- */
+
+/* 候補画像一覧を表示するエリア */
+#select-box-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5%;
+}
+
+/* グリッドの中の候補画像のcol */
+.candidate-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0%;
+}
+
+/* colに入れる画像 */
+.candidate-col img {
+    width: 100%;
+    padding: 5%;
+}
+
+/* 画像が選択された状態 */
+.candidate-col img[data-selected='true'] {
+    background-color: #0d6efd;
+}
+
+
+/* モーダルウィンドウを表示するボタン */
+/* JSからクリックさせるため，非表示にする */
+#open-candidate-modal-button{
+    display: none;
+}
+
+/* アノテーションの位置が決まったときに，OKマークを表示するエリア */
+#accept-annotation-mark-area{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    display: none;
+}
+
+/* サーバへのデータアップが成功したときに表示するマーク */
+#accept-annotation-mark{
+    width: 30%;
+}
+
+/* 候補一覧表示モーダルのボタンを表示するエリア */
+#annotation-modal-footer{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+
+
+/* ---- デバッグ専用 ---- */
+#debug-area{
+    color: white;
+    display: flex;
+    flex-direction: column;
+
+    margin-top: 100px;
+}
+
+.debug-row{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.debug-row p{
+    margin-left: 30px;
+}
+
+.item-title{
+    margin-left: 10%;
+}
+
+.item-value{
+    margin-right: 10%;
+}
+
+/* #permit{
+    display: none;
+} */
