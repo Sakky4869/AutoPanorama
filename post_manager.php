@@ -42,7 +42,10 @@ class PostManager{
                 "message" => "methodがありません"
             );
 
-            $json_manager->echo_json_response($data);
+            $ret = $json_manager->get_json_response($data);
+
+            header( "Content-Type: application/json; charset=utf-8");
+            echo $ret;
 
             exit();
         }

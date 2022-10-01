@@ -3,7 +3,7 @@
  * URLのクエリからパノラマIDを取得する
  * @returns パノラマID
  */
-function getPanoramaID(){
+function getPanoramaID() {
 
     let url = new URL(window.location.href);
 
@@ -17,58 +17,74 @@ function getPanoramaID(){
  * @param {string} panoramaID パノラマID
  * @returns パノラマのオリジナル画像のURL
  */
-function getPanoramaOriginUrl(panoramaID){
+function getPanoramaOriginUrl(panoramaID) {
 
     // 2022/09/27
     // サーバサイドが未開発のため，臨時データをreturn
     // return './panorama_imgs/2022-09-08_17-33-00/origin.jpg';
-    return './panorama_imgs/2022-09-08_17-33-00/preview.jpg';
 
-    $.ajax({
-        type: 'POST',
-        url: './panorama_play_server.php',
-        dataType: 'json',
-        data: {
-          'method': 'get-panorama-origin', 'panorama-id': panoramaID
-        },
-        success: function (response) {
-            if(response['result'] == true){
-                return response['origin-url'];
-            }else{
-                showErrorMessage(response['message']);
-                return null;
-            }
-        }
-    });
+    // 2022/10/01
+    // クライアントのみでURLを構築可能と判明したため，通信はしない
+    return './panorama_imgs/' + panoramaID + '/origin.jpg';
+
+    // $.ajax({
+    //     type: 'POST',
+    //     url: './panorama_play_server.php',
+    //     dataType: 'json',
+    //     data: {
+    //         'method': 'get-panorama-origin', 'panorama-id': panoramaID
+    //     },
+    //     success: function (response) {
+    //         if (response['result'] == true) {
+    //             return response['origin-url'];
+    //         } else {
+    //             showErrorMessage(response['message']);
+    //             return null;
+    //         }
+    //     }
+    // });
 }
 
 /**
  * パノラマIDをもとに，アノテーションデータを取得する
  * @param {string} panoramaID パノラマID
  */
-function getAnnotationDatas(panoramaID){
+function getAnnotationDatas(panoramaID) {
 
     // 2022/09/27
     // サーバサイドが未開発のため，臨時データをreturn
-    return {
-        'datas': [
-            { 'annotation-id' : "2022-09-08_17-33-00",'theta' : 1.87, 'phi' : 3.10,
-                'annotation-url' : "./annotation_imgs/2022-09-18_17-33-00.jpg"},
-        ]
+    // return {
+    //     'datas': [
+    //         { 'annotation-id' : "2022-09-08_17-33-00",'theta' : 1.87, 'phi' : 3.10,
+    //             'annotation-url' : "./annotation_imgs/2022-09-18_17-33-00.jpg"},
+    //     ]
+    // };
+
+    let data = {
+        'method': 'get-annotation-datas',
+        'panorama-id': panoramaID
     };
 
-    $.ajax({
-        type: 'POST',
-        url: './panorama_play_server.php',
-        dataType: 'json',
-        data: {
-            'method': 'get-annotation-datas',
-            'panorama-id': panoramaID
-        },
-        success: function(response){
-            return response;
-        }
-    });
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            type: 'POST',
+            url: './panorama_play_server.php',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            async: true,
+        }).then(function (response) {
+
+            resolve(response);
+
+        }).fail(function (response) {
+
+            reject();
+
+        });
+
+    })
+
 }
 
 /**
@@ -76,7 +92,7 @@ function getAnnotationDatas(panoramaID){
  * 容量が大きいため，進捗を表示する
  * @param {string} img 画像ファイルの名前
  */
-function downloadPanoramaImage(img){
+function downloadPanoramaImage(img) {
 
     // プログレスバー取得
     const progressBar = $('#download-progress');
@@ -90,15 +106,15 @@ function downloadPanoramaImage(img){
     xhr.responseType = 'blob';
 
     // ダウンロード中の処理
-    xhr.onprogress = function(event){
+    xhr.onprogress = function (event) {
         let value = event.loaded / event.total * 100 | 0 + '%';
-        progressBar.css('width', value);
+        progressBar.css('width', value + '%');
         progressBar.html(value);
     };
 
     // ダウンロード完了時の処理
-    xhr.onreadystatechange = function(){
-        if(this.readyState == 4 && this.status == 200){
+    xhr.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
             setPanoramaImage(URL.createObjectURL(this.response));
             $('#loading-window').css('display', 'none');
             $('#add-annotation-button').css('display', 'flex');
@@ -114,16 +130,16 @@ function downloadPanoramaImage(img){
  * @param {string} msg エラーのメインメッセージ
  * @param {string} optMsg エラーのオプションメッセージ
  */
-function showErrorMessage(msg, optMsg){
+function showErrorMessage(msg, optMsg) {
     const errorMainMsg = $('#error-main-message');
     errorMainMsg.html(msg);
 
-    if(optMsg != null){
+    if (optMsg != null) {
         const errorOptMsg = $('#error-option-message');
         errorOptMsg.html(optMsg);
     }
 
-    if(msg == 'パノラマが見つかりませんでした'){
+    if (msg == 'パノラマが見つかりませんでした') {
         const errorActionButton = $('#error-action-button');
         errorActionButton.css('display', 'inline');
         errorActionButton.click(function (e) {
@@ -138,6 +154,6 @@ function showErrorMessage(msg, optMsg){
  * パノラマIDをクエリに付与し，アノテーション追加画面へリダイレクトする
  * @param {string} panoramaID パノラマID
  */
-function redirectToAnnotationPage(panoramaID){
+function redirectToAnnotationPage(panoramaID) {
     window.location.href = './add_annotation.php?panorama-id=' + panoramaID;
 }

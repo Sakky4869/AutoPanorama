@@ -159,7 +159,7 @@ $panorama_datas = get_panorama_datas();
             $('.preview-card').click(function (e) {
 
                 // パノラマIDをクエリに追加して，パノラマ画面に移動するようにセット
-                window.location.href = './panorama_play.php?panorama-id=' + e.target.getAttribute('panorama-id');
+                window.location.href = './panorama_play.php?panorama-id=' + $(this).data('panorama-id');
 
             });
         });

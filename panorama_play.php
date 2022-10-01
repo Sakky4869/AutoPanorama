@@ -115,7 +115,7 @@ if($app_config->check_use_login_func() == true){
     <script src="./js/panorama_play.js"></script>
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(async function() {
 
             // パノラマのIDを取得
             let panoramaID = getPanoramaID();
@@ -123,18 +123,21 @@ if($app_config->check_use_login_func() == true){
             // パノラマ画像のURLを取得
             let panoramaOriginUrl = getPanoramaOriginUrl(panoramaID);
 
+            // console.log('panorama url', panoramaOriginUrl);
+
             // アノテーションデータを取得
-            // let annotationDatas = getAnnotationData(panoramaID);
+            let annotationDatas = await getAnnotationDatas(panoramaID);
+            // console.log(annotationDatas);
 
             // 臨時のアノテーションデータを作成
-            let annotationDatas = {
-                'datas': [{
-                    'annotation-id': "2022-09-08_17-33-00",
-                    'theta': 1.87,
-                    'phi': 3.10,
-                    'annotation-url': "./annotation_imgs/2022-09-18_17-33-00.jpg"
-                }, ]
-            };
+            // let annotationDatas = {
+            //     'datas': [{
+            //         'annotation-id': "2022-09-08_17-33-00",
+            //         'theta': 1.87,
+            //         'phi': 3.10,
+            //         'annotation-url': "./annotation_imgs/2022-09-18_17-33-00.jpg"
+            //     }, ]
+            // };
 
             // パノラマ空間の初期化
             init(panoramaOriginUrl, annotationDatas);
@@ -147,7 +150,6 @@ if($app_config->check_use_login_func() == true){
                 redirectToAnnotationPage(panoramaID);
             });
 
-            // init('./panorama_imgs/2022-09-08_17-33-00/origin.jpg', annotationDatas);
         });
     </script>
 </body>
