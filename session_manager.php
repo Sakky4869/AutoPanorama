@@ -29,7 +29,5 @@ class SessionManager{
     }
 }
 
-// セッション開始
-session_start();
 
 ?>
