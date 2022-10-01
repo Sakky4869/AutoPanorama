@@ -22,7 +22,7 @@ function getPanoramaOriginUrl(panoramaID){
     // 2022/09/27
     // サーバサイドが未開発のため，臨時データをreturn
     // return './panorama_imgs/2022-09-08_17-33-00/origin.jpg';
-    return './panorama_imgs/2022-09-08_17-33-00/origin_min.jpg';
+    return './panorama_imgs/2022-09-08_17-33-00/preview.jpg';
 
     $.ajax({
         type: 'POST',
