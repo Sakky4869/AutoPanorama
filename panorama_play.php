@@ -1,3 +1,24 @@
+<?php
+
+// セッション開始
+session_start();
+
+require_once(dirname(__FILE__) . '/view_common.php');
+
+// ログイン機能を使う場合
+if($app_config->check_use_login_func() == true){
+
+    // セッションにIDが存在しない場合
+    if($session_manager->check_session_has_key('ID') == false){
+
+        // ログイン画面にリダイレクト
+        $session_manager->redirect_to('./login.php');
+    }
+}
+
+
+?>
+
 <!DOCTYPE html>
 <html lang="ja">
 
