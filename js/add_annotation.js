@@ -298,8 +298,10 @@ function takeAnnotation(video, width, height) {
     canvasCamera.attr('height', height);
     const context = canvasCamera[0].getContext('2d');
     context.drawImage(video, 0, 0, width, height);
-    const dataUrl = canvasCamera[0].toDataURL('image/jpeg');
+    let dataUrl = canvasCamera[0].toDataURL('image/png');
     $('#camera-image').attr('src', dataUrl);
+    // PHPで受け取るために，プレフィクスを削除
+    dataUrl = dataUrl.replace(/^data:\w+\/\w+;base64,/, '');
     $('#camera-image').css('display', 'inline');
 
     $('#camera-video')[0].srcObject.getTracks().forEach(track => {
@@ -320,43 +322,52 @@ function uploadAnnotation(annotation, direction, annotationID) {
     let panoramaID = getPanoramaID();
 
     // サーバサイドが未開発のため，臨時データを用意
-    let response = {
-        'annotation-id': '2022-09-18_17-33-00', 'panorama-id': '2022-09-18_17-33-00',
-        'images' : [
-            {'index': '0', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-            'theta': 1.87, 'phi': 3.10},
-            {'index': '1', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-            'theta': 1.87, 'phi': 3.10},
-            {'index': '2', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-            'theta': 1.87, 'phi': 3.10},
-            {'index': '3', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-            'theta': 1.87, 'phi': 3.10},
-            {'index': '4', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-            'theta': 1.87, 'phi': 3.10},
-            {'index': '5', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-            'theta': 1.87, 'phi': 3.10},
-            {'index': '6', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-            'theta': 1.87, 'phi': 3.10},
-            {'index': '7', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-            'theta': 1.87, 'phi': 3.10},
-            {'index': '8', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-            'theta': 1.87, 'phi': 3.10},
-        ]
+    // let response = {
+    //     'annotation-id': '2022-09-18_17-33-00', 'panorama-id': '2022-09-18_17-33-00',
+    //     'images' : [
+    //         {'index': '0', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+    //         'theta': 1.87, 'phi': 3.10},
+    //         {'index': '1', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+    //         'theta': 1.87, 'phi': 3.10},
+    //         {'index': '2', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+    //         'theta': 1.87, 'phi': 3.10},
+    //         {'index': '3', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+    //         'theta': 1.87, 'phi': 3.10},
+    //         {'index': '4', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+    //         'theta': 1.87, 'phi': 3.10},
+    //         {'index': '5', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+    //         'theta': 1.87, 'phi': 3.10},
+    //         {'index': '6', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+    //         'theta': 1.87, 'phi': 3.10},
+    //         {'index': '7', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+    //         'theta': 1.87, 'phi': 3.10},
+    //         {'index': '8', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+    //         'theta': 1.87, 'phi': 3.10},
+    //     ]
+    // };
+
+    // showCandidateAreas(response);
+
+    // return;
+
+    let data = {
+        'method': 'add-annotation', 'annotation': annotation,
+        'direction': direction, 'annotation-id': annotationID,
+        'panorama-id': panoramaID,
     };
 
-    showCandidateAreas(response);
-
-    return;
     $.ajax({
         type: 'POST',
-        url: './add_annotation.php',
-        data: {
-            'method': 'add-annotation', 'annotation': annotation,
-            'direction': direction, 'annotation-id': annotationID,
-            'panorama-id': panoramaID,
-        },
+        url: './add_annotation_server.php',
+        data: JSON.stringify(data),
+        // data: {
+        //     'method': 'add-annotation', 'annotation': annotation,
+        //     'direction': direction, 'annotation-id': annotationID,
+        //     'panorama-id': panoramaID,
+        // },
         dataType: 'json',
-        timout: 120000,
+        contentType: 'application/json',
+        // timout: 120000,
         success: function (response) {
             showCandidateAreas(response);
         }
@@ -563,27 +574,21 @@ function decideAnnotation() {
     const panoramaID = selectBoxArea.attr('data-panorama-id');
 
 
-    // サーバが未開発のため，アップせずにリダイレクト
-    // 1.5秒チェックマークを表示して，パノラマ画面にリダイレクト
-    $('#select-box-area').css('display', 'none');
-    $('#accept-annotation-mark-area').css('display', 'flex');
-    setTimeout(function(){
-        window.location.href = './panorama_play.php?panorama-id=' + panoramaID;
-    }, 1.5 * 1000);
-
-    return;
+    let data = {
+        'method': 'decide-annotation',
+        'annotation-id': annotationID, 'panorama-id': panoramaID,
+        'theta': theta, 'phi': phi
+    };
 
     // データをサーバにアップ
     $.ajax({
         type: "post",
-        url: "./add_annotation.php",
-        data: {
-            'method': 'decide-annotation',
-            'annotation-id': annotationID, 'panorama-id': panoramaID,
-            'theta': theta, 'phi': phi
-        },
+        url: "./add_annotation_server.php",
+        data: JSON.stringify(data),
         dataType: "json",
+        contentType: 'applicatoin/json',
         success: function (response) {
+            console.log(response);
             // データのアップに成功したとき
             if(response['result'] == 'true'){
                 //1.5秒チェックマークを表示して，パノラマ画面にリダイレクト
