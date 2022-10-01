@@ -1,4 +1,3 @@
-
 /**
  * ビデオ要素
  */
@@ -14,37 +13,81 @@ var width, height;
  */
 var os;
 
+/**
+ * device orientation eventのabsolute
+ */
+var absolute;
+
+/**
+ * device orientation eventのalpha
+ */
+var alpha;
+
+/**
+ * device orientation eventのbeta
+ */
+var beta;
+
+/**
+ * device orientation eventのganma
+ */
+var ganma;
+
 async function init() {
 
-
+    // OSを特定
     os = detectOS();
 
+    // iPhoneのとき
+    // 特別な処理をする必要があるらしいが，現状は何もしない
     if (os == 'iphone') {
+        console.log('iphone');
         // $('#permit').css('display', 'inline');
         // $('#permit').click(function (e) {
 
         // });
-        console.log('iphone');
     } else if (os == 'android') {
+        console.log('android');
+        // 傾きのイベント発生時に，傾きを取得する関数をセット
         window.addEventListener('deviceorientation', getPhoneDirection, true);
     } else {
-        console.log('PCは未対応');
+        console.log('PCは非対応');
     }
 
+    // カメラ起動
     let cameraData = await startCamera();
     let video = cameraData['video'];
     let width = cameraData['width'];
     let height = cameraData['height'];
 
+    // 撮影ボタンをクリックしたとき
     $('#take-button').click(function(event){
+
+        // 撮影
         let annotation = takeAnnotation(video, width, height);
-        let direction = getPhoneDirection();
+
+        // Y軸を中心とする，スマホの傾きを取得
+        let direction = alpha;//getPhoneDirection();
+
+        // 撮影画像のIDを首都奥
         let annotationID = getAnnotationID();
+
+        // サーバにアップロード
         uploadAnnotation(annotation, direction, annotationID);
+    });
+
+    // アノテーション候補一覧から，撮影物体と一致するものを選んだとき
+    $('#decide-annotation-button').click(function(event){
+        // アノテーションデータをサーバにアップロード
+        decideAnnotation();
     });
 
 }
 
+/**
+ * アクセスに使用したOSがどれか取得する
+ * @returns OSを表す文字 iphone android pc
+ */
 function detectOS() {
     if (navigator.userAgent.indexOf('iPhone') > 0
         || navigator.userAgent.indexOf('iPad') > 0
@@ -70,15 +113,30 @@ function getPanoramaID() {
     return params.get('panorama-id');
 }
 
+/**
+ * 小数を，指定の桁に丸める
+ * @param {float} value 小数の元データ
+ * @param {int} n 桁数
+ * @returns 指定の桁で丸めた小数
+ */
 function floatDecimal(value, n) {
     return Math.floor(value * Math.pow(10, n)) / Math.pow(10, n);
 }
 
+/**
+ * デバイスの向きを取得する
+ * @param {deviceoorientation} event 傾きイベント
+ * @returns イベントで取得できる傾きのうち，地面に垂直な軸を中心とする角度
+ */
 function getPhoneDirection(event) {
-    let absolute = event.absolute;
-    let alpha = event.alpha;
-    let beta = event.beta;
-    let ganma = event.ganma;
+    // let absolute = event.absolute;
+    absolute = event.absolute;
+    // let alpha = event.alpha;
+    alpha = event.alpha;
+    // let beta = event.beta;
+    beta = event.beta;
+    // let ganma = event.ganma;
+    ganma = event.ganma;
 
     // let degree;
     // if (os == 'iphone') {
@@ -114,7 +172,7 @@ function getPhoneDirection(event) {
     //     // console.log('北西');
     // }
 
-    degree = floatDecimal(degree, 3);
+    // degree = floatDecimal(degree, 3);
     absolute = floatDecimal(absolute, 3);
     alpha = floatDecimal(alpha, 3);
     beta = floatDecimal(beta, 3);
@@ -129,41 +187,57 @@ function getPhoneDirection(event) {
     // $('ganma-value').html(ganma);
 }
 
-function compassHeading(alpha, beta, ganma) {
+/**
+ * 向きを補正する
+ * Androidではこれが必要らしい．現状は未使用．
+ * @param {float} alpha アルファ
+ * @param {float} beta ベータ
+ * @param {float} ganma ガンマ
+ * @returns 向きの情報
+ */
+// function compassHeading(alpha, beta, ganma) {
 
-    let degToRad = Math.PI / 180;
+//     let degToRad = Math.PI / 180;
 
-    let x = beta ? beta * degToRad : 0;
-    let y = ganma ? ganma * degToRad : 0;
-    let z = alpha ? alpha * degToRad : 0;
+//     let x = beta ? beta * degToRad : 0;
+//     let y = ganma ? ganma * degToRad : 0;
+//     let z = alpha ? alpha * degToRad : 0;
 
-    let cX = Math.cos(x);
-    let cY = Math.cos(y);
-    let cZ = Math.cos(z);
-    let sX = Math.sin(x);
-    let sY = Math.sin(y);
-    let sZ = Math.sin(z);
+//     let cX = Math.cos(x);
+//     let cY = Math.cos(y);
+//     let cZ = Math.cos(z);
+//     let sX = Math.sin(x);
+//     let sY = Math.sin(y);
+//     let sZ = Math.sin(z);
 
-    let vX = - cZ * sY - sZ * sX * cY;
-    let vY = - sZ * sY + cZ * sX * cY;
+//     let vX = - cZ * sY - sZ * sX * cY;
+//     let vY = - sZ * sY + cZ * sX * cY;
 
-    let heading = Math.atan(vX / vY);
+//     let heading = Math.atan(vX / vY);
 
-    if (vY < 0) {
-        heading += Math.PI;
-    } else if (vX < 0) {
-        heading += 2 * Math.PI;
-    }
+//     if (vY < 0) {
+//         heading += Math.PI;
+//     } else if (vX < 0) {
+//         heading += 2 * Math.PI;
+//     }
 
-    return heading * (180 / Math.PI);
-}
+//     return heading * (180 / Math.PI);
+// }
 
+
+
+/**
+ * アノテーションIDを取得する
+ */
 function getAnnotationID() {
     let takeTime = dayjs().format('YYYY-MM-DD_HH-mm-ss');
     return takeTime;
-    // console.log(nowStr);
 }
 
+/**
+ * カメラを起動し，映像データ・幅・高さを取得する
+ * @returns カメラの映像データと幅と高さ
+ */
 async function startCamera() {
 
     try {
@@ -211,6 +285,13 @@ async function startCamera() {
     }
 }
 
+/**
+ * 写真を撮影して，一時保存した画像データのURLを取得する
+ * @param {video} video カメラ映像を流しているvideo要素
+ * @param {int} width カメラの幅
+ * @param {int} height カメラの高さ
+ * @returns 一時的に保存した撮影画像のURL
+ */
 function takeAnnotation(video, width, height) {
     let canvasCamera = $('#camera-canvas');
     canvasCamera.attr('width', width);
@@ -228,6 +309,12 @@ function takeAnnotation(video, width, height) {
     return dataUrl;
 }
 
+/**
+ * 撮影画像データ・デバイスが向いている方向・アノテーションIDをサーバにアップ
+ * @param {string} annotation base64に変換した画像データ
+ * @param {int} direction デバイスが向いている方向
+ * @param {string} annotationID アノテーションID
+ */
 function uploadAnnotation(annotation, direction, annotationID) {
 
     let panoramaID = getPanoramaID();
@@ -305,6 +392,10 @@ function showCandidateAreasTest(){
     showCandidateAreas(response);
 }
 
+/**
+ *
+ * @param {array} candidateDatas 候補画像データ
+ */
 function showCandidateAreas(candidateDatas) {
 
     // アノテーションIDを取得
@@ -312,6 +403,10 @@ function showCandidateAreas(candidateDatas) {
 
     // パノラマIDを取得
     let panoramaID = candidateDatas['panorama-id'];
+
+    // 候補画像一覧のグリッドの表示エリアに，アノテーションIDとパノラマIDをセット
+    $('#select-box-area').attr('data-annotation-id', annotationID);
+    $('#select-box-area').attr('data-panorama-id', panoramaID);
 
     // 候補画像リストを取得
     let images = candidateDatas['images'];
@@ -325,6 +420,10 @@ function showCandidateAreas(candidateDatas) {
 
 }
 
+/**
+ * 候補画像一覧のグリッドを作成する
+ * @param {array} images 候補画像のURL
+ */
 function createCandidateGrid(images){
 
     // 候補画像一覧を表示するdivを取得
@@ -376,6 +475,10 @@ function createCandidateGrid(images){
     }
 }
 
+/**
+ * 候補画像をクリックしたときの選択処理を，img要素にセットする
+ * @param {click event} event クリックイベントデータ
+ */
 function setSelectFunctionOnImgElement(event){
 
     // すべての候補画像を取得
@@ -428,8 +531,71 @@ function showCandidateModal(){
     $('#open-candidate-modal-button').trigger('click');
 }
 
-
+/**
+ * アノテーションを決定して，サーバにデータをアップロード
+ */
 function decideAnnotation() {
 
+    // 候補画像一覧を取得
+    const candidateImages = $('.candidate-img');
+
+    let theta = null;
+    let phi = null;
+
+    // 候補画像一覧から，選択されているもののデータを取得
+    for(let i_images = 0; i_images < candidateImages.length; i_images++){
+        if(candidateImages[i_images].getAttribute('data-selected') == 'true'){
+            theta = candidateImages[i_images].getAttribute('data-theta');
+            phi = candidateImages[i_images].getAttribute('data-phi');
+        }
+    }
+
+    // １つも選択されていなければ，何もせずに終了
+    if(theta == null && phi == null){
+        return;
+    }
+
+    // 候補画像を表示しているdivを取得
+    const selectBoxArea = $('#select-box-area');
+
+    // アノテーションIDとパノラマIDを取得
+    const annotationID = selectBoxArea.attr('data-annotation-id');
+    const panoramaID = selectBoxArea.attr('data-panorama-id');
+
+
+    // サーバが未開発のため，アップせずにリダイレクト
+    // 1.5秒チェックマークを表示して，パノラマ画面にリダイレクト
+    $('#select-box-area').css('display', 'none');
+    $('#accept-annotation-mark-area').css('display', 'flex');
+    setTimeout(function(){
+        window.location.href = './panorama_play.php?panorama-id=' + panoramaID;
+    }, 1.5 * 1000);
+
+    return;
+
+    // データをサーバにアップ
+    $.ajax({
+        type: "post",
+        url: "./add_annotation.php",
+        data: {
+            'method': 'decide-annotation',
+            'annotation-id': annotationID, 'panorama-id': panoramaID,
+            'theta': theta, 'phi': phi
+        },
+        dataType: "json",
+        success: function (response) {
+            // データのアップに成功したとき
+            if(response['result'] == 'true'){
+                //1.5秒チェックマークを表示して，パノラマ画面にリダイレクト
+                $('#select-box-area').css('display', 'flex');
+                $('#accept-annotation-mark-area').css('display', 'flex');
+                setTimeout(function(){
+                    window.location.href = './panorama_play.php?panorama-id=' + panoramaID;
+                }, 1.5 * 1000);
+            }else{
+                console.log('アップに失敗');
+            }
+        }
+    });
 }
 

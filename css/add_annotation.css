@@ -27,11 +27,15 @@ nav{
     max-width: 80%;
 }
 
+/* 撮影データを画像化するために一時的に保存するcanvas */
+/* 基本的に非表示 */
 #camera-canvas{
-    max-width: 80%;
+    /* max-width: 80%; */
     display: none;
 }
 
+/* 撮影結果を表示するimg */
+/* 撮影したあとだけ表示 */
 #camera-image{
     max-width: 80%;
     display: none;
@@ -158,10 +162,12 @@ nav{
     display: none;
 }
 
+/* サーバへのデータアップが成功したときに表示するマーク */
 #accept-annotation-mark{
     width: 30%;
 }
 
+/* 候補一覧表示モーダルのボタンを表示するエリア */
 #annotation-modal-footer{
     display: flex;
     flex-direction: row;

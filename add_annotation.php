@@ -21,6 +21,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 
+
     <title>Auto Panorama</title>
 </head>
 
@@ -93,7 +94,7 @@
             </div>
         </div>
 
-        <div id="debug-area">
+        <!-- <div id="debug-area">
             <div class="debug-row">
                 <p class="item-title" id="direction">direction：</p>
                 <p class="item-value" id="direction-value"></p>
@@ -114,7 +115,7 @@
                 <p class="item-title" id="ganma">ganma：</p>
                 <p class="item-value" id="ganma-value"></p>
             </div>
-        </div>
+        </div> -->
 
     </div>
 
@@ -164,9 +165,6 @@
     <script>
         $(document).ready(async function() {
             await init();
-
-            showCandidateAreasTest();
-
         });
     </script>
 
