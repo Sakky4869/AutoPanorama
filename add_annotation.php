@@ -115,7 +115,7 @@ if($app_config->check_use_login_func() == true){
             </div>
         </div>
 
-        <!-- <div id="debug-area">
+        <div id="debug-area">
             <div class="debug-row">
                 <p class="item-title" id="direction">direction：</p>
                 <p class="item-value" id="direction-value"></p>
@@ -136,7 +136,7 @@ if($app_config->check_use_login_func() == true){
                 <p class="item-title" id="ganma">ganma：</p>
                 <p class="item-value" id="ganma-value"></p>
             </div>
-        </div> -->
+        </div>
 
     </div>
 

@@ -38,6 +38,23 @@ async function init() {
     // OSを特定
     os = detectOS();
 
+    // コンパスのキャリブレーションが必要な場合に警告を出す
+    window.addEventListener('compassneedscalibration', function(event){
+        console.log('キャリブレーションが必要');
+    }, true);
+
+    // デバイスモーションイベントの登録
+    window.addEventListener('devicemotion', function (event) {
+
+    }, true);
+
+    // let absolute_event = null;
+
+    // window.addEventListener('deviceorientationabsolute', function (event) {
+    //     console.log('絶対値取得');
+    //     absolute_event = event;
+    // }, true);
+
     // iPhoneのとき
     // 特別な処理をする必要があるらしいが，現状は何もしない
     if (os == 'iphone') {
@@ -49,10 +66,14 @@ async function init() {
     } else if (os == 'android') {
         console.log('android');
         // 傾きのイベント発生時に，傾きを取得する関数をセット
-        window.addEventListener('deviceorientation', getPhoneDirection, true);
+        // window.addEventListener('deviceorientation', getPhoneDirection, true);
+        window.addEventListener('deviceorientationabsolute', getPhoneDirection, true);
     } else {
         console.log('PCは非対応');
     }
+
+
+
 
     // カメラ起動
     let cameraData = await startCamera();
@@ -62,6 +83,11 @@ async function init() {
 
     // 撮影ボタンをクリックしたとき
     $('#take-button').click(function(event){
+
+
+        console.log(absolute_event);
+
+        return;
 
         // 撮影
         let annotation = takeAnnotation(video, width, height);
@@ -129,8 +155,14 @@ function floatDecimal(value, n) {
  * @returns イベントで取得できる傾きのうち，地面に垂直な軸を中心とする角度
  */
 function getPhoneDirection(event) {
+
     // let absolute = event.absolute;
     absolute = event.absolute;
+    if(absolute){
+        console.log('絶対');
+    }else{
+        console.log('絶対ではない');
+    }
     // let alpha = event.alpha;
     alpha = event.alpha;
     // let beta = event.beta;
@@ -138,53 +170,54 @@ function getPhoneDirection(event) {
     // let ganma = event.ganma;
     ganma = event.ganma;
 
-    // let degree;
-    // if (os == 'iphone') {
-    //     degree = event.webkitCompassHeading;
-    // } else {
-    //     degree = compassHeading(alpha, beta, ganma);
-    // }
+    let degree;
+    if (os == 'iphone') {
+        degree = event.webkitCompassHeading;
+    } else {
+        degree = compassHeading(alpha, beta, ganma);
+    }
 
-    // let direction;// = '無方向';
-    // if ((337.5 < degree && degree < 360) || (0 < degree && degree < 22.5)) {
-    //     direction = '北';
-    //     // console.log('北');
-    // } else if (22.5 < degree && degree < 67.5) {
-    //     direction = '北東';
-    //     // console.log('北東');
-    // } else if (67.5 < degree && degree < 112.5) {
-    //     direction = '東';
-    //     // console.log('東');
-    // } else if (112.5 < degree && degree < 157.5) {
-    //     direction = '東南';
-    //     // console.log('東南');
-    // } else if (157.5 < degree && degree < 202.5) {
-    //     direction = '南';
-    //     // console.log('南');
-    // } else if (202.5 < degree && degree < 247.5) {
-    //     direction = '南西';
-    //     // console.log('南西');
-    // } else if (247.5 < degree && degree < 292.5) {
-    //     direction = '西';
-    //     // console.log('西');
-    // } else if (292.5 < degree && degree < 337.5) {
-    //     direction = '北西';
-    //     // console.log('北西');
-    // }
+    let direction;// = '無方向';
+    if ((337.5 < degree && degree < 360) || (0 < degree && degree < 22.5)) {
+        direction = '北';
+        // console.log('北');
+    } else if (22.5 < degree && degree < 67.5) {
+        direction = '北東';
+        // console.log('北東');
+    } else if (67.5 < degree && degree < 112.5) {
+        direction = '東';
+        // console.log('東');
+    } else if (112.5 < degree && degree < 157.5) {
+        direction = '東南';
+        // console.log('東南');
+    } else if (157.5 < degree && degree < 202.5) {
+        direction = '南';
+        // console.log('南');
+    } else if (202.5 < degree && degree < 247.5) {
+        direction = '南西';
+        // console.log('南西');
+    } else if (247.5 < degree && degree < 292.5) {
+        direction = '西';
+        // console.log('西');
+    } else if (292.5 < degree && degree < 337.5) {
+        direction = '北西';
+        // console.log('北西');
+    }
 
-    // degree = floatDecimal(degree, 3);
+    degree = floatDecimal(degree, 3);
     absolute = floatDecimal(absolute, 3);
     alpha = floatDecimal(alpha, 3);
     beta = floatDecimal(beta, 3);
     ganma = floatDecimal(ganma, 3);
 
+    $('#direction-value').html(direction + '\n' + degree);
+    $('#absolute-value').html(absolute);
+    $('#alpha-value').html(alpha);
+    $('#beta-value').html(beta);
+    $('ganma-value').html(ganma);
+
     return alpha;
 
-    // $('#direction-value').html(direction + '\n' + degree);
-    // $('#absolute-value').html(absolute);
-    // $('#alpha-value').html(alpha);
-    // $('#beta-value').html(beta);
-    // $('ganma-value').html(ganma);
 }
 
 /**
@@ -195,34 +228,34 @@ function getPhoneDirection(event) {
  * @param {float} ganma ガンマ
  * @returns 向きの情報
  */
-// function compassHeading(alpha, beta, ganma) {
+function compassHeading(alpha, beta, ganma) {
 
-//     let degToRad = Math.PI / 180;
+    let degToRad = Math.PI / 180;
 
-//     let x = beta ? beta * degToRad : 0;
-//     let y = ganma ? ganma * degToRad : 0;
-//     let z = alpha ? alpha * degToRad : 0;
+    let x = beta ? beta * degToRad : 0;
+    let y = ganma ? ganma * degToRad : 0;
+    let z = alpha ? alpha * degToRad : 0;
 
-//     let cX = Math.cos(x);
-//     let cY = Math.cos(y);
-//     let cZ = Math.cos(z);
-//     let sX = Math.sin(x);
-//     let sY = Math.sin(y);
-//     let sZ = Math.sin(z);
+    let cX = Math.cos(x);
+    let cY = Math.cos(y);
+    let cZ = Math.cos(z);
+    let sX = Math.sin(x);
+    let sY = Math.sin(y);
+    let sZ = Math.sin(z);
 
-//     let vX = - cZ * sY - sZ * sX * cY;
-//     let vY = - sZ * sY + cZ * sX * cY;
+    let vX = - cZ * sY - sZ * sX * cY;
+    let vY = - sZ * sY + cZ * sX * cY;
 
-//     let heading = Math.atan(vX / vY);
+    let heading = Math.atan(vX / vY);
 
-//     if (vY < 0) {
-//         heading += Math.PI;
-//     } else if (vX < 0) {
-//         heading += 2 * Math.PI;
-//     }
+    if (vY < 0) {
+        heading += Math.PI;
+    } else if (vX < 0) {
+        heading += 2 * Math.PI;
+    }
 
-//     return heading * (180 / Math.PI);
-// }
+    return heading * (180 / Math.PI);
+}
 
 
 

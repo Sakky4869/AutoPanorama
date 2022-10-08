@@ -98,7 +98,8 @@ function initCamera() {
 
     // 位置を原点付近にセット
     // 原点にすると，ドラッグで回転できなくなるので，若干ずらす
-    camera.position.set(-0.1, 0, 0);
+    // camera.position.set(-0.1, 0, 0);
+    camera.position.set(0.1, 0, 0);
 
     // カメラが原点を向くようにする
     camera.lookAt(0, 0, 0);
@@ -237,6 +238,7 @@ function createPanoramaSphere() {
     sphere.name = 'PanoramaSphere';
     sphere.position.set(0, 0, 0);
     sphere.rotation.set(0, 0 * Math.PI / 180, 0);
+    // sphere.rotation.set(0, 180 * Math.PI / 180, 0);
 
     scene.add(sphere);
 
