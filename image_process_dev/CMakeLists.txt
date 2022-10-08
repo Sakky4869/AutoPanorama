@@ -18,6 +18,7 @@ endif()
 add_executable(image_process
     main.cpp
     # display.cpp
+    common.cpp
     convert_pano_to_cube.cpp
     convert_position.cpp
     debug_util.cpp

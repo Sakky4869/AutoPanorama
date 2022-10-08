@@ -37,7 +37,8 @@ using namespace cv;
 int main(int argc, char *argv[])
 {
 
-    // system("pwd");
+
+    // return 0;
 
     if(argc < 4){
         cout << "引数が足りない" << endl;
@@ -59,6 +60,8 @@ int main(int argc, char *argv[])
 
     // cout << "panorama_id: " << panorama_id << " , annotation_id: " << annotation_id << " , angle: " << picture_angle << endl;
 
+    write_log("panorama_id: " + panorama_id + " annotation_id: " + annotation_id + " angle: " + to_string(picture_angle));
+
     // 開始時刻を記録
     // timeval time_start;
     // gettimeofday(&time_start, NULL);
@@ -67,11 +70,14 @@ int main(int argc, char *argv[])
     // const string annotation_file_name = get_file_path("Kettle.jpg");
     const string annotation_file_name = get_annotation_path(annotation_id);
 
+    write_log("anotation file: " + annotation_file_name);
+
     // cout << "annotation file: " << annotation_file_name << endl;
     // debugl("annotation file: " + annotation_file_name);
     // パノラマのファイル名
     // const string panorama_file_name = get_file_path("panorama_lab_exp_02.jpg");
     const string panorama_file_name = get_panorama_path(panorama_id);
+    write_log("panorama file: " + panorama_file_name);
 
 
     // cout << "panorama file: " << panorama_file_name << endl;
@@ -80,18 +86,40 @@ int main(int argc, char *argv[])
     // ---- パノラマ画像とアノテーション画像を読み込んで，前処理 ----
 
     // アノテーションファイル読み込み
-    Mat annotation_img = imread(annotation_file_name);
+    Mat annotation_img;// = imread(annotation_file_name);
+    try{
+        annotation_img = imread(annotation_file_name);
+        write_log("アノテーションファイル読み込み完了");
+    }catch(cv::Exception &e){
+        write_log(e.err);
+        write_log(e.msg);
+    }
+    // Mat
 
     // cout << "アノテーションファイル読み込み完了" << endl;
     // cout << "annotation width: " << annotation_img.cols << ", height: " << annotation_img.rows << endl;
-
     // debugl("アノテーションファイル読み込み完了");
+    write_log("アノテーションファイル読み込み完了");
+    write_log("annotation width: " + to_string(annotation_img.cols) + " height: " + to_string(annotation_img.rows));
 
     // パノラマファイル読み込み
-    Mat panorama_img = imread(panorama_file_name);
+    Mat panorama_img;// = imread(panorama_file_name);
+    try
+    {
+        panorama_img = imread(panorama_file_name);
+        write_log("パノラマファイル読み込み完了");
+    }
+    catch(cv::Exception &e)
+    {
+        write_log(e.err);
+        write_log(e.msg);
+    }
+
 
     // cout << "パノラマファイル読み込み完了" << endl;
     // cout << "panorama width: " << panorama_img.cols << ", height: " << panorama_img.rows << endl;
+    write_log("パノラマファイル読み込み完了");
+    write_log("panorama width: " + to_string(panorama_img.cols) + " height: " + to_string(panorama_img.rows));
 
     // debugl("パノラマファイル読み込み完了");
 
@@ -102,12 +130,21 @@ int main(int argc, char *argv[])
     map<string, Mat> faces;
 
     // キューブマップ作成
-    if(convert_panorama_to_cubemap(panorama_img, cubemap, faces) == 1){
-        // cout << "キューブマップ変換完了" << endl;
-        // debugl("キューブマップ変換完了");
-    }else{
-        // cout << "キューブマップ変換失敗" << endl;
-        // debugl("キューブマップ変換失敗");
+    try{
+
+        if(convert_panorama_to_cubemap(panorama_img, cubemap, faces) == 1){
+            // cout << "キューブマップ変換完了" << endl;
+            // debugl("キューブマップ変換完了");
+            write_log("キューブマップ変換完了");
+        }else{
+            // cout << "キューブマップ変換失敗" << endl;
+            // debugl("キューブマップ変換失敗");
+            write_log("キューブマップ変換完了");
+        }
+
+    }catch(cv::Exception &e){
+        write_log(e.err);
+        write_log(e.msg);
     }
 
 #if USE_DB
@@ -118,7 +155,14 @@ int main(int argc, char *argv[])
     // ---- キューブマップ上の座標から，パノラマの上の座標に変換するマップを生成 ----
     Mat position_map(cubemap.rows, cubemap.cols, CV_32SC2);
 
-    create_position_map_from_cubemap_to_panorama(cubemap, panorama_img, position_map);
+    try{
+        create_position_map_from_cubemap_to_panorama(cubemap, panorama_img, position_map);
+        write_log("キューブマップ座標とパノラマ座標の対応マップ作成");
+
+    }catch(cv::Exception &e){
+        write_log(e.err);
+        write_log(e.msg);
+    }
 
     // ---- 撮影時の方位角から，抽出する領域を絞り込む ----
 
@@ -132,7 +176,14 @@ int main(int argc, char *argv[])
 
     // 領域を抽出する
     // その際，領域の左上の座標も記録する
-    extract_target_area(cubemap.clone(), picture_angle, target_area, target_area_top_left_x, target_area_top_left_y);
+    try{
+
+        extract_target_area(cubemap.clone(), picture_angle, target_area, target_area_top_left_x, target_area_top_left_y);
+        write_log("マッチング対象エリアを抽出");
+    }catch(cv::Exception &e){
+        write_log(e.err);
+        write_log(e.msg);
+    }
 
     // show_result("target", target_area);
     // return 0;
@@ -153,8 +204,16 @@ int main(int argc, char *argv[])
     // 候補画像表示のため，カラー画像の段階でキューブマップを分割
     vector<Mat> target_area_color_split;
 
-    // 分割
-    split_img(target_area.clone(), 5, target_area_color_split);
+    try{
+        // 分割
+        split_img(target_area.clone(), 5, target_area_color_split);
+        write_log("カラーのキューブマップを分割 幅：5");
+
+    }catch(cv::Exception &e){
+        write_log(e.err);
+        write_log(e.msg);
+    }
+
 
     // 代表色
     Vec3b repre_color;
@@ -164,8 +223,14 @@ int main(int argc, char *argv[])
 
     resize(annotation_img_for_repre_color, annotation_img_for_repre_color, Size(), 0.3, 0.3);
 
-    // 代表色を抽出
-    get_representative_color(annotation_img_for_repre_color.clone(), repre_color);
+    try{
+        // 代表色を抽出
+        get_representative_color(annotation_img_for_repre_color.clone(), repre_color);
+        write_log("アノテーション画像の代表色抽出");
+    }catch(cv::Exception &e){
+        write_log(e.err);
+        write_log(e.msg);
+    }
 
 
 #if USE_DB
@@ -192,8 +257,14 @@ int main(int argc, char *argv[])
 
     // return 0;
 
-    // アノテーション画像について，代表色との距離が遠いピクセルを黒くする
-    cut_not_representative_color(annotation_img, repre_color, color_dist_limit);
+    try{
+        // アノテーション画像について，代表色との距離が遠いピクセルを黒くする
+        cut_not_representative_color(annotation_img, repre_color, color_dist_limit);
+        write_log("アノテーション画像　代表色以外を除去");
+    }catch(cv::Exception &e){
+        write_log(e.err);
+        write_log(e.msg);
+    }
 
 #if USE_DB
     progress_count++;
@@ -202,9 +273,15 @@ int main(int argc, char *argv[])
 
     // show_result("cut_annotation", annotation_img);
 
-    // frontの画像について，代表色との距離が遠いピクセルを黒くする
-    // cut_not_representative_color(cubemap_front, repre_color, color_dist_limit);
-    cut_not_representative_color(target_area, repre_color, color_dist_limit);
+    try{
+        // frontの画像について，代表色との距離が遠いピクセルを黒くする
+        // cut_not_representative_color(cubemap_front, repre_color, color_dist_limit);
+        cut_not_representative_color(target_area, repre_color, color_dist_limit);
+        write_log("キューブマップの対象エリア　代表色以外を除去");
+    }catch(cv::Exception &e){
+        write_log(e.err);
+        write_log(e.msg);
+    }
 
 #if USE_DB
     progress_count++;
@@ -218,7 +295,13 @@ int main(int argc, char *argv[])
 
     vector<Mat> mat_list;
 
-    split_img(target_area.clone(), 5, mat_list);
+    try{
+        split_img(target_area.clone(), 5, mat_list);
+        write_log("キューブマップの対象エリアを分割　幅：5");
+    }catch(cv::Exception &e){
+        write_log(e.err);
+        write_log(e.msg);
+    }
 
     int match_area_width = mat_list[0].cols;
 
@@ -267,7 +350,15 @@ int main(int argc, char *argv[])
             // cout << ".";
             MatchResult match_result;
 
-            match(annotation_img_resized, mat_list[j], 10, match_result);
+            try{
+                match(annotation_img_resized, mat_list[j], 10, match_result);
+
+            }catch(cv::Exception &e){
+
+                write_log(e.err);
+                write_log(e.msg);
+                continue;
+            }
 
             // cout << "\rmatching " << (j + 1) << " / " << mat_list.size();
 
@@ -296,7 +387,13 @@ int main(int argc, char *argv[])
         const string candidate_img_path = get_candidate_path(panorama_id, annotation_id, to_string(i));
 
         // 候補画像を書き込み
-        imwrite(candidate_img_path, target_area_color_split[min_dist_index]);
+        try{
+            imwrite(candidate_img_path, target_area_color_split[min_dist_index]);
+            write_log("候補画像を書き込み" + candidate_img_path);
+        }catch(cv::Exception &e){
+            write_log(e.err);
+            write_log(e.msg);
+        }
 
         // キューブマップ上のマッチング点の座標と，パノラマ上のマッチング点の座標を変換
         int match_pos_x = target_area_top_left_x + (int)src_pt_x;
@@ -305,9 +402,15 @@ int main(int argc, char *argv[])
         if (match_pos_x >= position_map.cols) match_pos_x = position_map.cols - 1;
         if (match_pos_y >= position_map.rows) match_pos_y = position_map.rows - 1;
 
-        int match_pos_x_in_panorama = position_map.at<Vec2i>(match_pos_y, match_pos_x)[0];
-        int match_pos_y_in_panorama = position_map.at<Vec2i>(match_pos_y, match_pos_x)[1];
-
+        int match_pos_x_in_panorama;// = position_map.at<Vec2i>(match_pos_y, match_pos_x)[0];
+        int match_pos_y_in_panorama;// = position_map.at<Vec2i>(match_pos_y, match_pos_x)[1];
+        try{
+            match_pos_x_in_panorama = position_map.at<Vec2i>(match_pos_y, match_pos_x)[0];
+            match_pos_y_in_panorama = position_map.at<Vec2i>(match_pos_y, match_pos_x)[1];
+        }catch(cv::Exception &e){
+            write_log(e.err);
+            write_log(e.msg);
+        }
         // ---- 画像処理結果の位置情報をデバッグのため出力 ----
         // cout << endl;
 

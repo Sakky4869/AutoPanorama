@@ -5,6 +5,7 @@
 #include<map>
 #include<string>
 #include<vector>
+#include<stdexcept>
 #endif
 
 #ifndef OPENCV_INCLUDE
@@ -16,3 +17,6 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/core/types.hpp>
 #endif
+
+
+void write_log(std::string data);

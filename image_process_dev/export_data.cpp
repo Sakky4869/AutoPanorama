@@ -12,6 +12,7 @@ void update_progress_database(string panorama_id, string annotation_id, int &pro
     // string command = "php ../update_detect_progress.php " + panorama_id + " " + annotation_id + " " + to_string(progress);
     string command = "php ./update_detect_progress.php update-progress " + panorama_id + " " + annotation_id + " " + to_string(progress);
 
+    write_log("exec: " + command);
     // cout << endl << "exec: " << command << endl;
     // debugl("exec: " + command);
 
@@ -34,6 +35,7 @@ void send_detect_result(string panorama_id, string annotation_id, string result)
     // string command = "php ./update_detect_progress.php upload-result " + panorama_id + " " + annotation_id + " " + result;
     string command = "php ./update_detect_progress.php upload-result " + panorama_id + " " + annotation_id + " " + match_result_file_name;
 
+    write_log("exec: " + command);
     // cout << endl << "exec: " + command << endl;
     // debugl("exec: " + command);
 

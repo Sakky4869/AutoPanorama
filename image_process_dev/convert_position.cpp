@@ -29,6 +29,7 @@ void create_position_map_from_cubemap_to_panorama(Mat cubemap, Mat panorama, Mat
 
     // cout << "対応マップ作成開始" << endl;
     // debugl("対応マップ作成開始");
+    write_log("対応マップ作成開始");
 
     bool x_over_flag = false;
     bool y_over_flag = false;
@@ -128,6 +129,7 @@ void create_position_map_from_cubemap_to_panorama(Mat cubemap, Mat panorama, Mat
 
     // cout << "対応マップ作成完了" << endl;
     // debugl("対応マップ作成完了");
+    write_log("対応マップ作成完了");
 
     convert_map.copyTo(position_map);
 
