@@ -24,3 +24,6 @@ image_process
 
 # コアダンプファイル
 core.*
+
+# マッチングデータのJSONファイルを保存するディレクトリ
+match_result_json/*
