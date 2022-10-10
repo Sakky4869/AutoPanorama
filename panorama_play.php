@@ -95,6 +95,27 @@ if($app_config->check_use_login_func() == true){
         <div class="add-annotation-mark-parts mark-hor"></div>
     </button>
 
+    <!-- アノテーションの詳細情報を表示するモーダルウィンドウ -->
+    <!-- if you want to close by clicking outside the modal, delete the last endpoint:data-bs-backdrop and data-bs-keyboard -->
+    <div class="modal fade" id="annotation-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitleId" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="annotation-modal-title">詳細</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div id="annotation-modal-body" class="modal-body">
+                    <img id="annotation-img" src="" alt="">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                    <!-- <button type="button" class="btn btn-primary">Save</button> -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 
     <!-- JQuery -->
     <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
@@ -128,16 +149,6 @@ if($app_config->check_use_login_func() == true){
             // アノテーションデータを取得
             let annotationDatas = await getAnnotationDatas(panoramaID);
             // console.log(annotationDatas);
-
-            // 臨時のアノテーションデータを作成
-            // let annotationDatas = {
-            //     'datas': [{
-            //         'annotation-id': "2022-09-08_17-33-00",
-            //         'theta': 1.87,
-            //         'phi': 3.10,
-            //         'annotation-url': "./annotation_imgs/2022-09-18_17-33-00.jpg"
-            //     }, ]
-            // };
 
             // パノラマ空間の初期化
             init(panoramaOriginUrl, annotationDatas);

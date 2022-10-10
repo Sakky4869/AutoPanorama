@@ -118,13 +118,27 @@ nav{
 
 /* ---- アノテーション候補表示関係 ---- */
 
+.modal-header{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#wait-area{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
 /* 候補画像一覧を表示するエリア */
 #select-box-area {
-    display: flex;
+    /* display: flex; */
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 5%;
+    display: none;
 }
 
 /* グリッドの中の候補画像のcol */
@@ -151,6 +165,14 @@ nav{
 /* モーダルウィンドウを表示するボタン */
 /* JSからクリックさせるため，非表示にする */
 #open-candidate-modal-button{
+    display: none;
+}
+
+#cancel-annotation-button{
+    display: none;
+}
+
+#decide-annotation-button{
     display: none;
 }
 

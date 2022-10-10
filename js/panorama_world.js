@@ -33,6 +33,12 @@ var controls;
 
 var panoramaSphere;
 
+var raycaster = new THREE.Raycaster();
+
+var pointer = new THREE.Vector2();
+
+var clickFlag = false;
+
 /**
  * パノラマ画像のURLとアノテーションデータの配列で，
  * パノラマ空間を初期化する
@@ -74,7 +80,15 @@ function init(panoramaUrl, annotationDatas) {
     // 画面がリサイズしたときの処理
     window.addEventListener('resize', handleResize, false);
 
+    // 画面をクリックしたときの処理
+    // アノテーションをクリックしたら，詳細情報を表示する
+    const stage = document.querySelector('#panorama-world');
+    stage.addEventListener('click', onPointerClick);
+    // window.addEventListener('click', onPointerClick);
+
     render();
+
+    // requestAnimationFrame(render);
 }
 
 /**
@@ -296,7 +310,8 @@ function setAnnotation(annotationData) {
     let annotationID = annotationData['annotation-id'];
     let theta = parseFloat(annotationData['theta']);
     let phi = parseFloat(annotationData['phi']);
-    let annotationUrl = annotationData['annotation-url'];
+    // console.log('theta', theta, 'phi', phi);
+    // let annotationUrl = annotationData['annotation-url'];
 
     // アノテーションに使用するマテリアルを作成
     let annotationMaterial = createMaterial('./imgs/annotation_photo.jpg');
@@ -311,7 +326,9 @@ function setAnnotation(annotationData) {
     annotationBox.position.set(positions[0], positions[2], positions[1]);
 
     annotationBox.lookAt(camera.position);
-    annotationBox.name = 'annotation,' + annotationID + ',' + annotationUrl;
+    // annotationBox.name = 'annotation,' + annotationID + ',' + annotationUrl;
+    annotationBox.name = 'annotationBox';
+    annotationBox.userData.annotationUrl = './annotation_imgs/' + annotationID + '.jpg';
     annotationBox.material.transparent = true;
     annotationBox.material.alphaToCoverage = true;
     annotationBox.material.opacity = 1;
@@ -349,11 +366,70 @@ function handleResize() {
 }
 
 /**
+ * クリックしたときの処理
+ * Raycastを使ってアノテーションをクリックしたら，
+ * 詳細情報を表示する
+ * @param {PointerClickEvent} event
+ */
+function onPointerClick(event){
+
+    const element = event.currentTarget;
+
+    let x = event.clientX - element.offsetLeft;
+    let y = event.clientY - element.offsetTop;
+
+    let w = element.offsetWidth;
+    let h = element.offsetHeight;
+
+    pointer.x = (x / w) * 2 - 1;
+    pointer.y = -(y / h) * 2 + 1;
+
+    // console.log('click', 'x', pointer.x, 'y', pointer.y);
+
+    clickFlag = true;
+}
+
+/**
  * 描画関数
  */
 function render() {
 
     // console.log('call render');
+
+    // クリックしたとき
+    if(clickFlag){
+
+        clickFlag = false;
+
+        // レイキャスト
+        raycaster.setFromCamera(pointer, camera);
+
+        // レイキャストのヒット情報を取得
+        let intersects = raycaster.intersectObjects(scene.children);
+
+        // 最も手前にあるオブジェクトのみ取得
+        let hitObje = intersects[0].object;
+
+        // 当たったオブジェクトが，アノテーションだったら
+        if(hitObje.name == 'annotationBox'){
+
+            // 当たったオブジェクトから，アノテーションのURLを取得
+            let url = hitObje.userData.annotationUrl;
+
+            // モーダルウィンドウを取得
+            let annotationModal = new bootstrap.Modal(document.getElementById('annotation-modal'), {
+                keyboard: false
+            });
+
+            // モーダルウィンドウの画像エリアにURLをセット
+            document.getElementById('annotation-img').setAttribute('src', url);
+
+            // モーダルウィンドウを表示する
+            annotationModal.show()
+
+        }
+
+    }
 
     requestAnimationFrame(render);
 
