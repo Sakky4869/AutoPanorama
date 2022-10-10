@@ -26,11 +26,21 @@ void send_detect_result(string panorama_id, string annotation_id, string result)
     const string match_result_file_name = "./match_result_json/" + panorama_id + "_" + annotation_id + ".json";
     ofstream ofs(match_result_file_name, ios::out);
     if(!ofs){
+        write_log("ファイル　" + match_result_file_name + "が開けませんでした");
         // cout << "ファイル: " << match_result_file_name << " を開けませんでした" << endl;
         return;
     }
     ofs << result;
     ofs.close();
+
+    chmod(match_result_file_name.c_str(),
+        S_IRUSR | S_IWUSR |
+        S_IRGRP | S_IWGRP |
+        S_IROTH | S_IWOTH
+    );
+
+
+    write_log("ファイル " + match_result_file_name + " に書き込み権限を与えた");
 
     // string command = "php ./update_detect_progress.php upload-result " + panorama_id + " " + annotation_id + " " + result;
     string command = "php ./update_detect_progress.php upload-result " + panorama_id + " " + annotation_id + " " + match_result_file_name;
@@ -62,6 +72,8 @@ void convert_result_struct_to_json(Result result, string &json_str){
     // cout << "---- result ----" << endl;
     // debugl("---- result ----");
     // cout << j.dump() << endl;
+
+    write_log("JSON形式に変換");
 
     json_str = j.dump();
 }

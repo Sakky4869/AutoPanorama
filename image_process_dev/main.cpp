@@ -37,6 +37,12 @@ using namespace cv;
 int main(int argc, char *argv[])
 {
 
+    // 以前のログと区別しやすくするため改行
+    for (int i = 0; i < 5; i++)
+    {
+        write_log(" ");
+    }
+
 
     // return 0;
 
@@ -77,7 +83,7 @@ int main(int argc, char *argv[])
     // パノラマのファイル名
     // const string panorama_file_name = get_file_path("panorama_lab_exp_02.jpg");
     const string panorama_file_name = get_panorama_path(panorama_id);
-    write_log("panorama file: " + panorama_file_name);
+    write_log("panorama file: " + panorama_file_name + " at 80");
 
 
     // cout << "panorama file: " << panorama_file_name << endl;
@@ -91,8 +97,9 @@ int main(int argc, char *argv[])
         annotation_img = imread(annotation_file_name);
         write_log("アノテーションファイル読み込み完了");
     }catch(cv::Exception &e){
-        write_log(e.err);
-        write_log(e.msg);
+        // write_log(e.err);
+        // write_log(e.msg);
+        write_log_opencv("imread" + annotation_file_name + " at 96");
     }
     // Mat
 
@@ -111,8 +118,9 @@ int main(int argc, char *argv[])
     }
     catch(cv::Exception &e)
     {
-        write_log(e.err);
-        write_log(e.msg);
+        // write_log(e.err);
+        // write_log(e.msg);
+        write_log_opencv("imread " + panorama_file_name + " at " + to_string(117));
     }
 
 
@@ -143,8 +151,9 @@ int main(int argc, char *argv[])
         }
 
     }catch(cv::Exception &e){
-        write_log(e.err);
-        write_log(e.msg);
+        // write_log(e.err);
+        // write_log(e.msg);
+        write_log_opencv("convert panorama to cubemap at 150");
     }
 
 #if USE_DB
@@ -160,8 +169,9 @@ int main(int argc, char *argv[])
         write_log("キューブマップ座標とパノラマ座標の対応マップ作成");
 
     }catch(cv::Exception &e){
-        write_log(e.err);
-        write_log(e.msg);
+        // write_log(e.err);
+        // write_log(e.msg);
+        write_log_opencv("create position map from cubemap to panorama at 168");
     }
 
     // ---- 撮影時の方位角から，抽出する領域を絞り込む ----
@@ -181,8 +191,9 @@ int main(int argc, char *argv[])
         extract_target_area(cubemap.clone(), picture_angle, target_area, target_area_top_left_x, target_area_top_left_y);
         write_log("マッチング対象エリアを抽出");
     }catch(cv::Exception &e){
-        write_log(e.err);
-        write_log(e.msg);
+        // write_log(e.err);
+        // write_log(e.msg);
+        write_log_opencv("extract target area at 190");
     }
 
     // show_result("target", target_area);
@@ -210,8 +221,9 @@ int main(int argc, char *argv[])
         write_log("カラーのキューブマップを分割 幅：5");
 
     }catch(cv::Exception &e){
-        write_log(e.err);
-        write_log(e.msg);
+        // write_log(e.err);
+        // write_log(e.msg);
+        write_log_opencv("split img target color at 220");
     }
 
 
@@ -228,8 +240,9 @@ int main(int argc, char *argv[])
         get_representative_color(annotation_img_for_repre_color.clone(), repre_color);
         write_log("アノテーション画像の代表色抽出");
     }catch(cv::Exception &e){
-        write_log(e.err);
-        write_log(e.msg);
+        // write_log(e.err);
+        // write_log(e.msg);
+        write_log_opencv("get representative color at 239");
     }
 
 
@@ -262,8 +275,9 @@ int main(int argc, char *argv[])
         cut_not_representative_color(annotation_img, repre_color, color_dist_limit);
         write_log("アノテーション画像　代表色以外を除去");
     }catch(cv::Exception &e){
-        write_log(e.err);
-        write_log(e.msg);
+        // write_log(e.err);
+        // write_log(e.msg);
+        write_log_opencv("cut not representative color annotation at 274");
     }
 
 #if USE_DB
@@ -279,8 +293,9 @@ int main(int argc, char *argv[])
         cut_not_representative_color(target_area, repre_color, color_dist_limit);
         write_log("キューブマップの対象エリア　代表色以外を除去");
     }catch(cv::Exception &e){
-        write_log(e.err);
-        write_log(e.msg);
+        // write_log(e.err);
+        // write_log(e.msg);
+        write_log_opencv("cut not representative color cubemap at 292");
     }
 
 #if USE_DB
@@ -299,8 +314,9 @@ int main(int argc, char *argv[])
         split_img(target_area.clone(), 5, mat_list);
         write_log("キューブマップの対象エリアを分割　幅：5");
     }catch(cv::Exception &e){
-        write_log(e.err);
-        write_log(e.msg);
+        // write_log(e.err);
+        // write_log(e.msg);
+        write_log_opencv("split target area at 313");
     }
 
     int match_area_width = mat_list[0].cols;
@@ -341,8 +357,11 @@ int main(int argc, char *argv[])
         // 領域の中で最も類似度が高いもののインデックス
         int min_dist_index = -1;
 
+        Mat min_dist_match_img;
+
         float src_pt_x = -1;
         float src_pt_y = -1;
+
 
         for (int j = 0; j < mat_list.size(); j++)
         {
@@ -370,6 +389,7 @@ int main(int argc, char *argv[])
                 min_dist_index = j;
                 src_pt_x = match_result.x + match_area_width * (j % 5);
                 src_pt_y = match_result.y + match_area_width * (j / 5);
+                min_dist_match_img = match_result.match_img;
             }
 
         }
@@ -390,9 +410,12 @@ int main(int argc, char *argv[])
         try{
             imwrite(candidate_img_path, target_area_color_split[min_dist_index]);
             write_log("候補画像を書き込み" + candidate_img_path);
+            imwrite(get_match_img_path(panorama_id, annotation_id, to_string(i)), min_dist_match_img);
+
         }catch(cv::Exception &e){
-            write_log(e.err);
-            write_log(e.msg);
+            // write_log(e.err);
+            // write_log(e.msg);
+            write_log_opencv("候補画像書き込み at 406");
         }
 
         // キューブマップ上のマッチング点の座標と，パノラマ上のマッチング点の座標を変換
@@ -402,14 +425,34 @@ int main(int argc, char *argv[])
         if (match_pos_x >= position_map.cols) match_pos_x = position_map.cols - 1;
         if (match_pos_y >= position_map.rows) match_pos_y = position_map.rows - 1;
 
-        int match_pos_x_in_panorama;// = position_map.at<Vec2i>(match_pos_y, match_pos_x)[0];
-        int match_pos_y_in_panorama;// = position_map.at<Vec2i>(match_pos_y, match_pos_x)[1];
+        int match_pos_x_in_panorama = -1;// = position_map.at<Vec2i>(match_pos_y, match_pos_x)[0];
+        int match_pos_y_in_panorama = -1;// = position_map.at<Vec2i>(match_pos_y, match_pos_x)[1];
         try{
             match_pos_x_in_panorama = position_map.at<Vec2i>(match_pos_y, match_pos_x)[0];
             match_pos_y_in_panorama = position_map.at<Vec2i>(match_pos_y, match_pos_x)[1];
+
+            if(match_pos_x_in_panorama == 1 || match_pos_x_in_panorama == 0
+            || match_pos_y_in_panorama == 1 || match_pos_y_in_panorama == 0
+            || match_pos_x_in_panorama == -1 || match_pos_y_in_panorama == -1){
+                continue;
+            }
+            write_log("マッチング座標　セル X: " + to_string((int)src_pt_x) + " Y: " + to_string((int)src_pt_y));
+            write_log("マッチング座標　キューブマップ X: " + to_string(match_pos_x) + " Y: " + to_string(match_pos_y));
+            write_log("マッチング座標　パノラマ X: " + to_string(match_pos_x_in_panorama) + " Y: " + to_string(match_pos_y_in_panorama));
+
+            Mat ret = cubemap.clone();
+            circle(ret, Point(match_pos_x, match_pos_y), 30, Scalar(0, 210, 0), 10, LINE_AA);
+            show_result("match_" + panorama_id + "_" + annotation_id + "_cubemap_x_" + to_string(match_pos_x) + "_y_" + to_string(match_pos_y), ret);
+            write_log("キューブマップに点を描画");
+
+            ret = panorama_img.clone();
+            circle(ret, Point(match_pos_x_in_panorama ,match_pos_y_in_panorama), 30, Scalar(0, 200, 0), 10, LINE_AA);
+            show_result("match_" + panorama_id + "_" + annotation_id + "_" + to_string(i)  + "_panorama_x_" + to_string(match_pos_x_in_panorama) + "_y_" + to_string(match_pos_y_in_panorama), ret);
+            write_log("パノラマに点を描画");
         }catch(cv::Exception &e){
-            write_log(e.err);
-            write_log(e.msg);
+            // write_log(e.err);
+            // write_log(e.msg);
+            write_log_opencv("対応座標取り出し at 424");
         }
         // ---- 画像処理結果の位置情報をデバッグのため出力 ----
         // cout << endl;
@@ -446,6 +489,8 @@ int main(int argc, char *argv[])
         info.url = candidate_img_path;
         info.theta = theta;
         info.phi = phi;
+
+        write_log("パノラマ座標 Theta: " + to_string(info.theta) + " Phi: " + to_string(phi));
 
         // マッチングデータに格納
         result.imgs.push_back(info);

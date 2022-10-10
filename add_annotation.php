@@ -115,7 +115,7 @@ if($app_config->check_use_login_func() == true){
             </div>
         </div>
 
-        <div id="debug-area">
+        <!-- <div id="debug-area">
             <div class="debug-row">
                 <p class="item-title" id="direction">direction：</p>
                 <p class="item-value" id="direction-value"></p>
@@ -136,7 +136,7 @@ if($app_config->check_use_login_func() == true){
                 <p class="item-title" id="ganma">ganma：</p>
                 <p class="item-value" id="ganma-value"></p>
             </div>
-        </div>
+        </div> -->
 
     </div>
 
@@ -150,10 +150,18 @@ if($app_config->check_use_login_func() == true){
         <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="candidate-modal-title">撮影したものはどれ？</h5>
+                    <h5 class="modal-title" id="candidate-modal-title">画像処理の待機中</h5>
                         <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
                 </div>
                 <div class="modal-body">
+
+                    <!-- 画像処理システムの結果待ちのときに表示するエリア -->
+                    <div class="container-sm" id="wait-area">
+                        <button id="progress-value" class="btn btn-primary" type="button" disabled>
+                            <span style="margin-right: 5px;" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            0%
+                        </button>
+                    </div>
 
                     <!-- 候補画像一覧を表示するエリア -->
                     <div class="container-sm" id="select-box-area"></div>
@@ -166,7 +174,7 @@ if($app_config->check_use_login_func() == true){
                 </div>
 
                 <div id="annotation-modal-footer" class="modal-footer">
-                    <button  type="button" class="btn btn-secondary" data-bs-dismiss="modal">この中にはない</button>
+                    <button id="cancel-annotation-button"  type="button" class="btn btn-secondary" data-bs-dismiss="modal">この中にはない</button>
                     <button id="decide-annotation-button" type="button" class="btn btn-primary">決定</button>
                 </div>
             </div>
@@ -185,6 +193,8 @@ if($app_config->check_use_login_func() == true){
     <!-- 画面作成の際，カメラからの映像取得を確認するため，臨時のスクリプトを作成 -->
     <script>
         $(document).ready(async function() {
+
+            // $('#open-candidate-modal-button').trigger('click');
             await init();
         });
     </script>

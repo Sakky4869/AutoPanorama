@@ -137,7 +137,7 @@ void create_position_map_from_cubemap_to_panorama(Mat cubemap, Mat panorama, Mat
 
 
 void get_theta_and_phi(int panorama_x, int panorama_y, int panorama_width, int panorama_height, double &theta, double &phi){
-
+    write_log("パノラマ width: " + to_string(panorama_width) + ", height: " + to_string(panorama_height));
     // double v = 1 - ( (double) panorama_y / (double) panorama_height );
     double v = (double) panorama_y / (double) panorama_height ;
     theta = v * M_PI;

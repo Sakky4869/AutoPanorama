@@ -33,20 +33,24 @@ var beta;
  */
 var ganma;
 
+var degree;
+
+var annotationID;
+
 async function init() {
 
     // OSを特定
     os = detectOS();
 
     // コンパスのキャリブレーションが必要な場合に警告を出す
-    window.addEventListener('compassneedscalibration', function(event){
-        console.log('キャリブレーションが必要');
-    }, true);
+    // window.addEventListener('compassneedscalibration', function(event){
+    //     console.log('キャリブレーションが必要');
+    // }, true);
 
     // デバイスモーションイベントの登録
-    window.addEventListener('devicemotion', function (event) {
+    // window.addEventListener('devicemotion', function (event) {
 
-    }, true);
+    // }, true);
 
     // let absolute_event = null;
 
@@ -85,18 +89,18 @@ async function init() {
     $('#take-button').click(function(event){
 
 
-        console.log(absolute_event);
+        // console.log(absolute_event);
 
-        return;
+        // return;
 
         // 撮影
         let annotation = takeAnnotation(video, width, height);
 
         // Y軸を中心とする，スマホの傾きを取得
-        let direction = alpha;//getPhoneDirection();
+        let direction = degree;//alpha;//getPhoneDirection();
 
         // 撮影画像のIDを首都奥
-        let annotationID = getAnnotationID();
+        annotationID = getAnnotationID();
 
         // サーバにアップロード
         uploadAnnotation(annotation, direction, annotationID);
@@ -158,11 +162,11 @@ function getPhoneDirection(event) {
 
     // let absolute = event.absolute;
     absolute = event.absolute;
-    if(absolute){
-        console.log('絶対');
-    }else{
-        console.log('絶対ではない');
-    }
+    // if(absolute){
+    //     console.log('絶対');
+    // }else{
+    //     console.log('絶対ではない');
+    // }
     // let alpha = event.alpha;
     alpha = event.alpha;
     // let beta = event.beta;
@@ -170,39 +174,39 @@ function getPhoneDirection(event) {
     // let ganma = event.ganma;
     ganma = event.ganma;
 
-    let degree;
+    // let degree;
     if (os == 'iphone') {
         degree = event.webkitCompassHeading;
     } else {
         degree = compassHeading(alpha, beta, ganma);
     }
 
-    let direction;// = '無方向';
-    if ((337.5 < degree && degree < 360) || (0 < degree && degree < 22.5)) {
-        direction = '北';
-        // console.log('北');
-    } else if (22.5 < degree && degree < 67.5) {
-        direction = '北東';
-        // console.log('北東');
-    } else if (67.5 < degree && degree < 112.5) {
-        direction = '東';
-        // console.log('東');
-    } else if (112.5 < degree && degree < 157.5) {
-        direction = '東南';
-        // console.log('東南');
-    } else if (157.5 < degree && degree < 202.5) {
-        direction = '南';
-        // console.log('南');
-    } else if (202.5 < degree && degree < 247.5) {
-        direction = '南西';
-        // console.log('南西');
-    } else if (247.5 < degree && degree < 292.5) {
-        direction = '西';
-        // console.log('西');
-    } else if (292.5 < degree && degree < 337.5) {
-        direction = '北西';
-        // console.log('北西');
-    }
+    // let direction;// = '無方向';
+    // if ((337.5 < degree && degree < 360) || (0 < degree && degree < 22.5)) {
+    //     direction = '北';
+    //     // console.log('北');
+    // } else if (22.5 < degree && degree < 67.5) {
+    //     direction = '北東';
+    //     // console.log('北東');
+    // } else if (67.5 < degree && degree < 112.5) {
+    //     direction = '東';
+    //     // console.log('東');
+    // } else if (112.5 < degree && degree < 157.5) {
+    //     direction = '東南';
+    //     // console.log('東南');
+    // } else if (157.5 < degree && degree < 202.5) {
+    //     direction = '南';
+    //     // console.log('南');
+    // } else if (202.5 < degree && degree < 247.5) {
+    //     direction = '南西';
+    //     // console.log('南西');
+    // } else if (247.5 < degree && degree < 292.5) {
+    //     direction = '西';
+    //     // console.log('西');
+    // } else if (292.5 < degree && degree < 337.5) {
+    //     direction = '北西';
+    //     // console.log('北西');
+    // }
 
     degree = floatDecimal(degree, 3);
     absolute = floatDecimal(absolute, 3);
@@ -210,13 +214,14 @@ function getPhoneDirection(event) {
     beta = floatDecimal(beta, 3);
     ganma = floatDecimal(ganma, 3);
 
-    $('#direction-value').html(direction + '\n' + degree);
-    $('#absolute-value').html(absolute);
-    $('#alpha-value').html(alpha);
-    $('#beta-value').html(beta);
-    $('ganma-value').html(ganma);
+    // $('#direction-value').html(direction + '\n' + degree);
+    // $('#absolute-value').html(absolute);
+    // $('#alpha-value').html(alpha);
+    // $('#beta-value').html(beta);
+    // $('ganma-value').html(ganma);
 
-    return alpha;
+    // return alpha;
+    return degree;
 
 }
 
@@ -402,45 +407,126 @@ function uploadAnnotation(annotation, direction, annotationID) {
         contentType: 'application/json',
         // timout: 120000,
         success: function (response) {
+            // showCandidateAreas(response);
+            console.log(response);
+            start_wait_image_process();
+        }
+    });
+}
+
+function start_wait_image_process(){
+
+
+    // 候補画像を表示するモーダルウィンドウを表示
+    $('#open-candidate-modal-button').trigger('click');
+
+    $('#wait-area').css('display', 'flex');
+
+    let data = {
+        'method': 'check-image-progress',
+        'panorama-id': getPanoramaID(),
+        'annotation-id': annotationID
+    };
+
+    let progress = 0;
+
+    let intervalID = setInterval(() => {
+
+        // 進捗が100%になったら,通信を終了
+        if(progress == 100){
+            get_candidate_datas();
+            clearInterval(intervalID);
+
+            // 候補一覧を表示する
+        }
+        $.ajax({
+            type: "POST",
+            url: "./add_annotation_server.php",
+            data: JSON.stringify(data),
+            dataType: "json",
+            contentType: 'application/json',
+            success: function (response) {
+                // console.log(response);
+                progress = parseInt(response['progress']);
+                document.getElementById('progress-value').childNodes[2].textContent = progress + '%';
+                // let inner = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>' +
+                //  progress +'%';
+                //  $('#progress-value').text(progress + '%');
+                //  $('#progress-value').text(inner.substring(1, inner.length - 1));
+                // console.log('進捗を確認', progress);
+            }
+        });
+
+    }, 1500);
+}
+
+function get_candidate_datas(){
+
+    // 待機中のロードボタンを消す
+    $('#wait-area').css('display', 'none');
+
+    // モーダルウィンドウのタイトルを変更
+    $('#candidate-modal-title').text('撮影した物体を選んでください');
+
+    // ボタンを再表示
+    $('#cancel-annotation-button').css('display', 'inline');
+    $('#decide-annotation-button').css('display', 'inline');
+
+    let data = {
+        'method': 'get-annotation-datas',
+        'panorama-id': getPanoramaID(),
+        'annotation-id': annotationID,
+    };
+
+    $.ajax({
+        type: "POST",
+        url: "./add_annotation_server.php",
+        data: JSON.stringify(data),
+        dataType: "json",
+        contentType: 'application/json',
+        success: function (response) {
+            console.log(response);
             showCandidateAreas(response);
         }
     });
 }
 
-function showCandidateAreasTest(){
-    // サーバサイドが未開発のため，臨時データを用意
-    let response = {
-        'annotation-id': '2022-09-18_17-33-00', 'panorama-id': '2022-09-18_17-33-00',
-        'images' : [
-            {'index': '0', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-            'theta': 1.87, 'phi': 3.10},
-            {'index': '1', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-            'theta': 1.87, 'phi': 3.10},
-            {'index': '2', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-            'theta': 1.87, 'phi': 3.10},
-            {'index': '3', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-            'theta': 1.87, 'phi': 3.10},
-            {'index': '4', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-            'theta': 1.87, 'phi': 3.10},
-            {'index': '5', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-            'theta': 1.87, 'phi': 3.10},
-            {'index': '6', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-            'theta': 1.87, 'phi': 3.10},
-            {'index': '7', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-            'theta': 1.87, 'phi': 3.10},
-            {'index': '8', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-            'theta': 1.87, 'phi': 3.10},
-        ]
-    };
+// function showCandidateAreasTest(){
+//     // サーバサイドが未開発のため，臨時データを用意
+//     let response = {
+//         'annotation-id': '2022-09-18_17-33-00', 'panorama-id': '2022-09-18_17-33-00',
+//         'images' : [
+//             {'index': '0', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+//             'theta': 1.87, 'phi': 3.10},
+//             {'index': '1', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+//             'theta': 1.87, 'phi': 3.10},
+//             {'index': '2', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+//             'theta': 1.87, 'phi': 3.10},
+//             {'index': '3', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+//             'theta': 1.87, 'phi': 3.10},
+//             {'index': '4', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+//             'theta': 1.87, 'phi': 3.10},
+//             {'index': '5', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+//             'theta': 1.87, 'phi': 3.10},
+//             {'index': '6', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+//             'theta': 1.87, 'phi': 3.10},
+//             {'index': '7', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+//             'theta': 1.87, 'phi': 3.10},
+//             {'index': '8', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
+//             'theta': 1.87, 'phi': 3.10},
+//         ]
+//     };
 
-    showCandidateAreas(response);
-}
+//     showCandidateAreas(response);
+// }
 
 /**
  *
  * @param {array} candidateDatas 候補画像データ
  */
 function showCandidateAreas(candidateDatas) {
+
+    $('#select-box-area').css('display', 'flex');
 
     // アノテーションIDを取得
     let annotationID = candidateDatas['annotation-id'];
@@ -458,8 +544,8 @@ function showCandidateAreas(candidateDatas) {
     // 候補画像一覧のグリッドを生成
     createCandidateGrid(images);
 
-    // 候補画像を表示するモーダルウィンドウを表示
-    $('#open-candidate-modal-button').trigger('click');
+    // // 候補画像を表示するモーダルウィンドウを表示
+    // $('#open-candidate-modal-button').trigger('click');
 
 
 }
@@ -483,6 +569,7 @@ function createCandidateGrid(images){
             // rowにするdivを生成
             row = document.createElement('div');
 
+
             // 属性追加
             row.setAttribute('class', 'row row-col-3');
 
@@ -501,7 +588,9 @@ function createCandidateGrid(images){
         const imgEle = document.createElement('img');
 
         // 属性セット
-        imgEle.setAttribute('src', imgData['url'] + '/' + i_images + '.png');
+        // imgEle.setAttribute('src', imgData['url'] + '/' + i_images + '.png');
+        // imgEle.setAttribute('src', imgData['url'] + '/' + (i_images + 1) + '.jpg');
+        imgEle.setAttribute('src', imgData['url']);
         imgEle.setAttribute('class', 'candidate-img');
         imgEle.setAttribute('data-selected', 'false');
         imgEle.setAttribute('data-index', i_images);

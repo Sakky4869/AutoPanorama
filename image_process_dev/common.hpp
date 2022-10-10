@@ -6,6 +6,8 @@
 #include<string>
 #include<vector>
 #include<stdexcept>
+#include<fstream>
+#include<time.h>
 #endif
 
 #ifndef OPENCV_INCLUDE
@@ -20,3 +22,5 @@
 
 
 void write_log(std::string data);
+
+void write_log_opencv(std::string data);

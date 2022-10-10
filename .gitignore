@@ -27,3 +27,4 @@ core.*
 
 # マッチングデータのJSONファイルを保存するディレクトリ
 match_result_json/*
+output_img/*

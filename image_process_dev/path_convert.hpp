@@ -8,4 +8,6 @@ std::string get_annotation_path(std::string annotation_id);
 
 std::string get_candidate_path(std::string panorama_id, std::string annotation_id, std::string index_str);
 
+std::string get_match_img_path(std::string panorama_id, std::string annotation_id, std::string index_str);
+
 

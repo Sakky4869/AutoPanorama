@@ -67,7 +67,7 @@ function upload_result($pdo, $result_str_file_name, $panorama_id, $annotation_id
         $phi = $data["phi"];
         $url = $data["url"];
 
-        $sql = 'insert into detect_result (panorama_id, annotation_id, img_index, phi, theta, url) values(?, ?, ?, ?, ?, ?)';
+        $sql = 'insert into detect_result (panorama_id, annotation_id, img_index, theta, phi, url) values(?, ?, ?, ?, ?, ?)';
 
         $statement = $pdo->prepare($sql);
 
