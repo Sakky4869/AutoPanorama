@@ -1,6 +1,17 @@
 {
     "files.associations": {
         "typeindex": "cpp",
-        "typeinfo": "cpp"
-    }
+        "typeinfo": "cpp",
+        "ostream": "cpp",
+        "iostream": "cpp",
+        "string": "cpp"
+    },
+    "python.autoComplete.extraPaths": [
+        "/home/sakai/anaconda3/lib/python3.9/site-packages "
+    ],
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": false,
+    "python.analysis.extraPaths": [
+        "/home/sakai/anaconda3/lib/python3.9/site-packages "
+    ]
 }
