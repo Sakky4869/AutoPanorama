@@ -52,6 +52,13 @@ void send_detect_result(string panorama_id, string annotation_id, string result)
     system(command.c_str());
 }
 
+void send_region_datas(string panorama_id){
+
+    string commnad = "php ./update_detect_progress.php upload-regions " + panorama_id;
+
+    system(commnad.c_str());
+}
+
 void convert_result_struct_to_json(Result result, string &json_str){
 
     json j;

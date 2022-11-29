@@ -26,7 +26,8 @@ add_executable(image_process
     export_data.cpp
     path_convert.cpp
     preprocess.cpp
-
+    utils.cpp
+    nms.cpp
 )
 
 find_package(OpenCV REQUIRED)

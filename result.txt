@@ -1,0 +1,116 @@
+output_img/selective_search_mindist_100 success to create
+output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0 success to create
+output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front success to create
+output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right success to create
+output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/back success to create
+output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/left success to create
+output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/top success to create
+output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/bottom success to create
+nms threshold: 0
+target face: front
+searching...
+search completed
+bounding box count: 122
+non maxmum suppression processing...
+non maxmum suppression completed
+reduced_rect count: 28
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_00.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_01.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_02.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_03.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_04.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_05.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_06.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_07.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_08.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_09.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_10.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_11.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_12.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_13.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_14.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_15.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_16.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_17.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_18.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_19.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_20.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_21.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_22.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_23.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_24.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_25.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_26.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_27.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/front/front_searched.jpg
+target face: right
+searching...
+search completed
+bounding box count: 278
+non maxmum suppression processing...
+non maxmum suppression completed
+reduced_rect count: 61
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_00.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_01.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_02.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_03.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_04.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_05.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_06.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_07.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_08.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_09.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_10.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_11.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_12.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_13.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_14.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_15.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_16.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_17.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_18.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_19.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_20.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_21.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_22.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_23.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_24.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_25.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_26.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_27.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_28.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_29.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_30.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_31.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_32.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_33.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_34.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_35.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_36.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_37.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_38.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_39.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_40.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_41.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_42.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_43.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_44.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_45.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_46.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_47.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_48.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_49.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_50.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_51.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_52.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_53.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_54.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_55.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_56.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_57.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_58.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_59.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_60.jpg
+write output_img/selective_search_mindist_100/2022-10-01_10-33-00_nsm_thresh_0/right/right_searched.jpg
+target face: back
+searching...

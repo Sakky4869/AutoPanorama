@@ -26,4 +26,6 @@ void update_progress_database(std::string panorama_id, std::string annotation_id
 
 void send_detect_result(std::string panorama_id, std::string annotation_id, std::string result);
 
+void send_region_datas(std::string panorama_id);
+
 void convert_result_struct_to_json(Result result, std::string &json_str);

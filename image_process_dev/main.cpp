@@ -6,6 +6,9 @@
 #include "export_data.hpp"
 #include "preprocess.hpp"
 #include "path_convert.hpp"
+#include "selective_search.hpp"
+#include "utils.hpp"
+#include "nms.hpp"
 
 // #include <iostream>
 // #include <string>
@@ -19,9 +22,10 @@
 
 using namespace std;
 using namespace cv;
+using json = nlohmann::json;
 
-#define USE_DB 1
-// #define USE_DB 0
+// #define USE_DB 1
+#define USE_DB 0
 
 /**
  * ---- 使い方 ----
@@ -32,6 +36,80 @@ using namespace cv;
  * 結果が出たら，結果をJSON文字列に変換して，PHPファイルを使って更新
  *  php ./update_detect_progress.php upload-result panorama_id annotation_id result_str
  */
+
+vector<string> split_str(string str){
+
+    vector<string> split_data;
+    string temp = "";
+
+    for (int i = 0; i < str.size(); i++)
+    {
+        if(str[i] == '='){
+            split_data.push_back(temp);
+            temp = "";
+        }else{
+            temp += str[i];
+        }
+    }
+
+    split_data.push_back(temp);
+
+    return split_data;
+
+}
+
+string check_type(string value){
+
+    bool dot = false;
+
+    for (int i = 0; i < value.size(); i++)
+    {
+        if(value[i] == '.'){
+            dot = true;
+            continue;
+        }
+
+        int diff = value[i] - '0';
+
+        if(0 < diff && diff > 9){
+            return "string";
+        }
+    }
+
+    if(dot) return "float";
+    return "int";
+
+}
+
+int get_commandline_params(vector<string> args, map<string, string> &param_str, map<string, int> &param_int, map<string, float> &param_float){
+
+    for (int i = 0; i < args.size(); i++)
+    {
+        string arg = args[i];
+
+        // keyとvalueのvectorに変換
+        vector<string> split_data = split_str(arg);
+
+        string key = split_data[0];
+        string value = split_data[1];
+
+        // valueについて，型を確認
+        // 数値，小数，文字列で処理を分ける
+        string value_type = check_type(value);
+
+        if(value_type == "int"){
+            param_int[key] = atoi(value.c_str());
+        }else if(value_type == "float"){
+            param_float[key] = atof(value.c_str());
+        }else if(value_type == "string"){
+            param_str[key] = value;
+        }
+
+    }
+
+    return 0;
+}
+
 
 
 int main(int argc, char *argv[])
@@ -51,17 +129,32 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    vector<string> args;
+    map<string, string> param_str;
+    map<string, int> param_int;
+    map<string, float> param_float;
+
+    for (int i = 1; i < argc; i++)
+    {
+        args.push_back(argv[i]);
+    }
+
+    get_commandline_params(args, param_str, param_int, param_float);
+
     // const string panorama_id = "2022-09-18_17-33-00";
-    const string panorama_id = argv[1];
+    // const string panorama_id = argv[1];
+    const string panorama_id = param_str["panorama_id"];
 
     // const string annotation_id = "2022-09-18_17-33-00";
-    const string annotation_id = argv[2];
+    // const string annotation_id = argv[2];
+    const string annotation_id = param_str["annotation_id"];
 
     const int total_progress_count = 28;
     int progress_count = 0;
 
     // int picture_angle = 140;
-    int picture_angle = atoi(argv[3]);
+    // int picture_angle = atoi(argv[3]);
+    int picture_angle = param_int["picture_angle"];
     // int angle = atoi(argv[3]);
 
     // cout << "panorama_id: " << panorama_id << " , annotation_id: " << annotation_id << " , angle: " << picture_angle << endl;
@@ -103,6 +196,7 @@ int main(int argc, char *argv[])
     }
     // Mat
 
+    imwrite("output_img/annotation_img.jpg", annotation_img);
     // cout << "アノテーションファイル読み込み完了" << endl;
     // cout << "annotation width: " << annotation_img.cols << ", height: " << annotation_img.rows << endl;
     // debugl("アノテーションファイル読み込み完了");
@@ -137,6 +231,8 @@ int main(int argc, char *argv[])
     // Faceのリスト
     map<string, Mat> faces;
 
+    vector<string> face_names = {"front", "right", "back", "left", "top", "bottom"};
+
     // キューブマップ作成
     try{
 
@@ -155,6 +251,390 @@ int main(int argc, char *argv[])
         // write_log(e.msg);
         write_log_opencv("convert panorama to cubemap at 150");
     }
+
+    imwrite("output_img/cubemap.jpg", cubemap);
+
+    // ---- キューブマップのFaceを2x2から10x10までのスケールでグリッド状に分割 ----
+    // ---- 分割した画像を書き出す ----
+
+    struct stat statbuf;
+
+    // 画像を保存するoutput_imgディレクトリの作成
+    // ディレクトリが存在しない場合
+    if(stat("output_img", &statbuf) != 0){
+        if(mkdir("output_img", 0777) == 0){
+            // cout << "success to create output_img" << endl;
+        }else{
+            // cout << "failed to create output_img" << endl;
+        }
+    }
+
+
+    // ---- Selective Searchに使用するパラメータ ----
+    // 指定は本プログラムのコマンドライン引数から
+    int ss_min_size = param_int["ss_min_size"];
+    int ss_smallest = param_int["ss_smallest"];
+    int ss_largest = param_int["ss_largest"];
+
+    // ---- Selective Searchで検出したBounding Boxの重複をNon-Maxmum Suppresionで消すためのパラメータ ----
+    // 指定は本プログラムのコマンドライン引数から
+    float nms_threshold = param_float["nms_threshold"];
+
+    // Faceの分割方法をセット
+    // gridは，2x2～10x10まで，等間隔のグリッドに分ける
+    // selective_searchは，Selective Searchによって物体らしい領域を抽出する
+    // 値のセットはコマンドライン引数「ss_mode」で，grid か selective_search のどちらか
+
+    // グリッドへの分割
+    // 画像の総数： 2304
+    // string extract_area_mode = "grid";
+
+    // Selective Search
+    // string extract_area_mode = "selective_search";
+    string extract_area_mode = param_str["ss_mode"];
+
+    // 保存するディレクトリの名前をセット
+    string dir_name_base = "output_img/" + extract_area_mode;
+
+
+    // Selective Searchのディレクトリ名に，mindistの情報を追加
+    // if(extract_area_mode == "selective_search"){
+    //     ostringstream oss;
+    //     oss << ss_min_size;
+    //     dir_name_base += "_mindist_" + oss.str();
+    // }
+
+    if(stat(dir_name_base.c_str(), &statbuf) != 0){
+        if(mkdir(dir_name_base.c_str(), 0777) == 0){
+            cout << dir_name_base << " success to create" << endl;
+        }else{
+            cout << dir_name_base << " failed to create" << endl;
+        }
+    }
+
+    dir_name_base += "/" + panorama_id;
+
+    // Selective Searchのときは，Non-Maximum Suppressionのthresholdに応じてディレクトリをわける
+    // if(extract_area_mode == "selective_search"){
+    //     ostringstream oss;
+    //     oss << nms_threshold;
+
+    //     dir_name_base += "_nsm_thresh_" + oss.str();
+    // }
+
+    // 使用するパノラマのIDのディレクトリの作成
+    // ディレクトリが存在しない場合
+    if(stat(dir_name_base.c_str(), &statbuf) != 0){
+        if(mkdir(dir_name_base.c_str(), 0777) == 0){
+            cout << dir_name_base << " success to create" << endl;
+        }else{
+            cout << dir_name_base << " failed to create" << endl;
+        }
+    }
+
+    long all_img_count = 0;
+
+    // 分割した画像を出力するディレクトリを作成
+    // アプリケーションのルートディレクトリの中にoutput_imgディレクトリを作成していることが前提
+    // for (int i = 0; i < face_names.size(); i++)
+    // {
+    //     // Faceの名前を取得
+    //     string face_name = face_names[i];
+
+    //     // Faceの名前を使い，ディレクトリ名を作成
+    //     // output_img/frontなど
+    //     string dir_name = dir_name_base + "/" + face_name;
+
+    //     // ディレクトリを作成
+    //     if(stat(dir_name.c_str(), &statbuf) != 0){
+    //         if(mkdir(dir_name.c_str(), 0777) == 0){
+    //             cout << dir_name << " success to create" << endl;
+    //         } else {
+    //             cout << dir_name << " failed to create" << endl;
+    //         }
+    //     }
+
+    //     // 各Faceのディレクトリ内に，分割したスケールごとのディレクトリを作成
+    //     // output_img/front/02x02　や　output_img/front/10x10など
+    //     // エリアの抽出モードがgridのときのみ実行
+    //     for (int j = 2; extract_area_mode == "grid" &&  j < 11; j++)
+    //     {
+    //         ostringstream oss;
+    //         oss << j;
+
+    //         string split_count_str = "";
+
+    //         if(j < 10){
+    //             split_count_str = "0" + oss.str();
+    //         }else{
+    //             split_count_str = oss.str();
+    //         }
+
+    //         // cout << "split count str: " << split_count_str << endl;
+
+    //         // ディレクトリ名を作成
+    //         string dir_name = dir_name_base + "/" + face_name + "/" + split_count_str + "x" + split_count_str;
+    //         // cout << "dir name : " << dir_name << endl;
+
+    //         // ディレクトリを作成
+    //         if(stat(dir_name.c_str(), &statbuf) != 0){
+    //             if(mkdir(dir_name.c_str(), 0777) == 0){
+    //                 cout << dir_name << " success to create" << endl;
+    //             }else{
+    //                 cout << dir_name << " failed to create" << endl;
+    //             }
+    //         }
+    //     }
+    // }
+
+    cout << "nms threshold: " << nms_threshold << endl;
+
+    // Selevtive SearchとNon-Maximum Suppresionのパラメータについては，以下を参照
+    // Notion: https://www.notion.so/d1de2a8fe593484ba08ad64f280b04d8
+
+    /** ---- 物体領域抽出と，画像ファイルおよび，DBへの登録 ----
+     * Notion：https://www.notion.so/DB-281d754e62ed4285b309608948442fac
+     *  自分のみアクセス可能
+    */
+
+    // 物体領域データを保存するJSON配列
+    json object_region_json;
+    object_region_json["regions"] = json::array();
+
+    // 物体領域のIDに使う番号
+    int region_index = 0;
+
+    // 物体領域の左上の頂点の座標を計算するため
+    // 各Faceの左上の頂点の座標を記録しておく
+    map<string, vector<int>> top_left_position_of_face = {
+        { "front",  { 1680, 1680 } },
+        { "left",   { 0   , 1680 } },
+        { "right",  { 3360, 1680 } },
+        { "back",   { 5040, 1680 } },
+        { "top",    { 1680, 0    } },
+        { "bottom", { 1680, 3360 } }
+    };
+
+
+    // Faceの名前のリストを使って，画像を分割し，保存
+    for (int i = 0; i < face_names.size(); i++)
+    {
+        // Faceの名前を取り出す
+        string face_name = face_names[i];
+
+        // Faceの名前に該当するFaceの画像を取得
+        Mat face = faces[face_name];
+
+        // 書き出し用に複製
+        Mat face_export = face.clone();
+
+        // ファイル名作成
+        // string face_file_name = dir_name_base + "/" + face_name + "/" + face_name + ".jpg";
+        // string face_file_name = dir_name_base + "/" + face_name + ".jpg";
+        string face_file_name = dir_name_base + "/" + face_name + ".png";
+
+
+        // Faceを書き出し
+        imwrite(face_file_name.c_str(), face);
+
+        cout << "target face: " << face_name << endl;
+
+
+        // ---- Selective Searchを使って領域分割 ----
+        if(extract_area_mode == "selective_search"){
+
+            cout << "searching..." << endl;
+            // Selective Searchを実行
+            // auto proposals = ss::selectiveSearch(face, 500, 0.8, 100, 3000, 10000, 2.5);
+            // auto proposals = ss::selectiveSearch(face, 500, 0.8, 100, 5000, 100000, 2.5);
+            auto proposals = ss::selectiveSearch(face, 500, 0.8, ss_min_size, ss_smallest, ss_largest, 2.5);
+
+            cout << "search completed" << endl;
+            cout << "bounding box count: " << proposals.size() << endl;
+
+            // 検出したバウンディングボックスを，floatのリストに変換
+            vector<vector<float>> rects;
+            for(auto&& rect : proposals){
+                rects.push_back({
+                    (float)rect.x, (float)rect.y, (float)rect.x + rect.width, (float)rect.y + rect.height
+                });
+            }
+
+            cout << "non maxmum suppression processing..." << endl;
+
+            // Non Maximum Suppressionで，不要な重なりを除去
+            vector<Rect> reduced_rects = nms(rects, nms_threshold);
+            cout << "non maxmum suppression completed" << endl;
+            cout << "reduced_rect count: " << reduced_rects.size() << endl;
+
+            // 画像ファイルにつける番号
+            int count = 0;
+
+            // 検出した領域すべてに対して実行
+            // for(auto&& rect : proposals){
+            for(auto&& rect : reduced_rects){
+
+                // 領域を四角形で囲んで可視化
+                rectangle(face_export, rect, Scalar(0, 200, 0), 1, LINE_AA);
+
+                // 領域部分だけを切り取り
+                Mat roi(face, rect);
+
+                ostringstream oss;
+                oss << count;
+
+                // 物体領域を保存する画像のファイル名
+                string file_name = "";
+
+                if(count < 10){
+                    // file_name = dir_name_base + "/" + face_name + "/" + face_name + "_0" + oss.str() + ".jpg";
+                    file_name = dir_name_base + "/" + face_name + "_0" + oss.str() + ".jpg";
+                }else{
+                    // file_name = dir_name_base + "/" + face_name + "/" + face_name + "_" + oss.str() + ".jpg";
+                    file_name = dir_name_base + "/" + face_name + "_" + oss.str() + ".jpg";
+                }
+
+                // cout << "roi width: " << roi.cols << ", height: " << roi.rows << endl;
+                imwrite(file_name, roi);
+                // cout << "write " << file_name << endl;
+
+                // 物体領域のJSON配列へ保存するデータ
+                json region_object;// = json::array();
+
+                // 物体領域IDを生成
+                string region_id = panorama_id + "_";
+                if(count < 10) region_id += "0" + to_string(count);
+                else region_id += to_string(count);
+
+                // 物体領域のIDをデータへ保存
+                region_object["region_id"] = region_id;
+
+                // ファイル名を絶対パスに変換
+                string absolute_file_name = realpath(file_name.c_str(), NULL);
+                region_object["img_file_path"] = absolute_file_name;
+
+                // 物体領域の矩形の左上の頂点について，Face内での座標を取得
+                int top_left_x_rect = rect.x;
+                int top_left_y_rect = rect.y;
+
+                // キューブマップ上の座標に変換
+                // キューブマップ上における，Faceの左上の頂点のX座標
+                int top_left_x_face = top_left_position_of_face[face_name][0];
+                // Faceの左上の頂点のX座標と，Face内での矩形の左上の頂点のX座標を足して，
+                // 矩形の左上の頂点のX座標が，キューブマップ上のどこにあるかを計算
+                int top_left_x_cubemap = top_left_x_face + top_left_x_rect;
+                // Y座標についての同様
+                int top_left_y_face = top_left_position_of_face[face_name][1];
+                int top_left_y_cubemap = top_left_y_face + top_left_y_rect;
+
+                // キューブマップ上の座標を，データに保存
+                region_object["top_left_x_cubemap"] = top_left_x_cubemap;
+                region_object["top_left_y_cubemap"] = top_left_y_cubemap;
+
+                // 物体領域を保存するJSON配列に追加
+                object_region_json["regions"].push_back(region_object);
+
+                count++;
+
+                // APIの使用料金を概算するため，書き出した画像の数を出力
+                all_img_count++;
+
+            }
+
+            // cout << "selective search areas count: " << count << endl;
+
+            // string file_name = dir_name_base + "/" + face_name +  "_searched.jpg";
+            string file_name = dir_name_base + "/" + face_name +  "_searched.png";
+
+            imwrite(file_name, face_export);
+
+            cout << "write " << file_name << endl;
+
+        }else{
+
+            // 2x2から10x10のグリッドに分割して保存
+            for (int j = 2; j < 11; j++)
+            {
+                // 分割した画像を保存するリスト
+                vector<Mat> mat_split;
+
+                ostringstream oss;
+                oss << j;
+
+                // 分割
+                split_img(face.clone(), j, mat_split);
+
+                // cout << "split count: " << j << ", array size: " << mat_split.size() << endl;
+
+                string split_count_str = "";
+
+                if(j < 10){
+                    split_count_str = "0" + oss.str();
+                }else{
+                    split_count_str = oss.str();
+                }
+
+                // ファイル名作成
+                string file_name = dir_name_base + "/" + face_name + "/" + split_count_str + "x" + split_count_str;
+
+                // 分割した画像を書き出す
+                for (int k = 0; k < mat_split.size(); k++)
+                {
+                    ostringstream oss_;
+                    oss_ << k;
+
+                    string index_name = "";
+                    if(k < 10){
+                        index_name = "0" + oss_.str();
+                    }else{
+                        index_name = oss_.str();
+                    }
+
+                    // string index_name = (k < 10) ? "0" : "" + oss_.str();
+                    string out_file_name = file_name + "/" + index_name  + ".jpg";
+                    // cout << "out file name: " << out_file_name << endl;
+                    imwrite(out_file_name, mat_split[k]);
+
+                    // APIの使用料金を概算するため，書き出した画像の数を出力
+                    all_img_count++;
+
+                    // cout << "img count: " << all_img_count << endl;
+                }
+
+            }
+        }
+
+    }
+
+    // all img count: 2304
+    // 各Faceを2x2～10x10に分割した場合の，画像の総数
+    cout << "all img count: " << all_img_count << endl;
+
+    // ---- 物体領域データを，PHPを経由してMySQLに保存するため， ----
+    // ---- JSONファイルに保存 ----
+
+    // JSON文字列に書き出し
+    string object_region_json_str = object_region_json.dump();
+
+    // JSONファイルへ書き出し
+    ofstream ofs("output_file/" + panorama_id + ".json");
+    ofs << object_region_json_str;
+    ofs.close();
+
+    cout << "write object region" << endl;
+
+    // 物体領域の取得結果をデータベースにアップ
+    // send_region_datas(panorama_id, object_region_json_str);
+    send_region_datas(panorama_id);
+
+    for (int i = 0; i < 5; i++)
+    {
+        cout << endl;
+    }
+
+
+    return 0;
+
 
 #if USE_DB
     progress_count++;
@@ -199,8 +679,6 @@ int main(int argc, char *argv[])
     // show_result("target", target_area);
     // return 0;
 
-    vector<string> face_names = {"front", "right", "back", "left", "top", "bottom"};
-
     // for (int i = 0; i < face_names.size(); i++)
     // {
     //     show_result("face_" + face_names[i], faces[face_names[i]]);
@@ -225,6 +703,25 @@ int main(int argc, char *argv[])
         // write_log(e.msg);
         write_log_opencv("split img target color at 220");
     }
+
+
+    // for (int i = 0; i < target_area_color_split.size(); i++)
+    // {
+    //     string file_name = "split_img_";
+    //     ostringstream oss;
+    //     oss << i;
+    //     if(i < 10){
+    //         file_name += "0" + oss.str();
+    //     }else{
+    //         file_name += oss.str();
+    //     }
+
+    //     file_name += ".jpg";
+
+    //     imwrite("output_img/" + file_name, target_area_color_split[i]);
+    // }
+
+    // return 0;
 
 
     // 代表色

@@ -28,3 +28,7 @@ core.*
 # マッチングデータのJSONファイルを保存するディレクトリ
 match_result_json/*
 output_img/*
+output_file/*
+selective_search_cpp/*
+clip_sample_python/*
+w2v_models/*

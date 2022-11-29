@@ -72,7 +72,7 @@ function init(panoramaUrl, annotationDatas) {
     panoramaSphere = createPanoramaSphere();
 
     // パノラマ画像を貼り付け
-    // setPanoramaImage(panoramaUrl);
+    setPanoramaImage(panoramaUrl);
 
     // アノテーションデータからアノテーションを生成
     setAnnotations(annotationDatas);
@@ -85,6 +85,14 @@ function init(panoramaUrl, annotationDatas) {
     const stage = document.querySelector('#panorama-world');
     stage.addEventListener('click', onPointerClick);
     // window.addEventListener('click', onPointerClick);
+
+
+    let data = {
+        'to-panorama-id': '2022-10-10_15-00-00',
+   		'phi': 6.70
+    };
+
+    setPanoramaLink(data);
 
     render();
 
@@ -298,6 +306,7 @@ function setAnnotations(annotationDatas) {
     for(let i = 0; i < datas.length; i++){
         setAnnotation(datas[i]);
     }
+
 }
 
 /**
@@ -333,6 +342,35 @@ function setAnnotation(annotationData) {
     annotationBox.material.alphaToCoverage = true;
     annotationBox.material.opacity = 1;
     scene.add(annotationBox);
+}
+
+function setPanoramaLink(linkData){
+
+    let theta = 1.57;
+    let phi = linkData['phi'];
+    let to_panorama_id = linkData['to-panorama-id'];
+
+    // リンクに使用するマテリアルを作成
+    let linkMaterial = createMaterial('./imgs/arrow.jpg');
+
+    // リンクの箱を作成
+    let linkBoxGeometry = new THREE.BoxGeometry(2, 2, 2, 10, 10, 10);
+    let linkBox = new THREE.Mesh(linkBoxGeometry, linkMaterial);
+
+
+    let positions = convertAnnotationPolarToCartesian(theta, phi);
+
+    linkBox.position.set(positions[0], positions[2], positions[1]);
+
+    linkBox.lookAt(camera.position);
+    linkBox.rotateZ(90 * Math.PI / 180);
+    // annotationBox.name = 'annotation,' + annotationID + ',' + annotationUrl;
+    linkBox.name = 'linkBox';
+    linkBox.userData.toPanoramaUrl = './panorama_imgs/' + to_panorama_id + '/origin.jpg';
+    linkBox.material.transparent = true;
+    linkBox.material.alphaToCoverage = true;
+    linkBox.material.opacity = 1;
+    scene.add(linkBox);
 }
 
 /**
@@ -427,6 +465,13 @@ function render() {
             // モーダルウィンドウを表示する
             annotationModal.show()
 
+        }else if(hitObje.name == 'linkBox'){
+
+            // 当たったオブジェクトから，次のパノラマのURLを取得
+            let url = hitObje.userData.toPanoramaUrl;
+
+            // パノラマの画像を変える
+            setPanoramaImage(url);
         }
 
     }

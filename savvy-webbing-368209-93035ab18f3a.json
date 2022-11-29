@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "savvy-webbing-368209",
+  "private_key_id": "93035ab18f3a40ab01b12c28d36131bb384865e6",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCt6ETqxLI0TcyB\nFc3w2yAtIApwB2E991B/tK8ySrNlFn2OHlNS+XEacEqC9Saj2nn5h0HCBQfD9v0m\nonEWb92FktJpb6Fj/Fsovi0F8of5+bAOVzkNQjwPqV73V2wyLfPqLzXzEsvAivpq\nSFivT6RpR6AL0w+C5T6TFwSmiUhHWy0WKf7tqNkGx3iRnQHlPoNIrqxv8Ak7tQHS\nQwbpnj5C2T/hEIL/8ouRMjwoALIKs5DJQblaMVZOV//krn8OlIeLK5AMPSIhIxqK\nPLQsU942vwgFU9Wv5aQC7dmSXTk3c9nz02KNfblKVXAdQsE//Nn75jR3skZdOzYl\nv4VAC1PPAgMBAAECggEADMiZpE5QMTMU2NpS+KUK8PY9fi20srrm0nRkOoSuOjyU\nfylwg5VtgH2HpKfDruDE/Zg5N7tp7jhONJRVTsprVMHNsM1xZimrQ8vzAFBrOW9m\nxy8XNQfM5XPUVMc631dsaicNRrB3hNBShxSJXF203r5Sn/vkVIFof6R+BYXq57/H\nYHwCKu3uwk49HWSB84lShmF8SB23/3wDbFhkjqJlX/CRYWZCxId1oSSTqF7Q+a9D\nQ2+uS6D2yfJEIhnYwKnf/zO4IMAuesq+WL9Q+lZgyQ+12i5ziD4koJSyN6rU/mw/\nR/hhfmXLpLc1d1daeGsCHI6tSHBy53iyq+T3bed0MQKBgQDn4wcTGdH15DzLdVNp\ntmv5r2JobqxH61mOEgeSgP4xI0T6l7wib6YWnCLIY6avCv6IbM/8RV+YjUZyCgN/\n3V35V9CS5y7hAtyO6IX9tW07nOL/3gaxabKAG9NsES65U9Q5dkCmRGwQDnJXebbT\nGII09q4fvinUluOj2jOt58XD8QKBgQC//cpUVG6Qb+Lx/7648O1DcZoiEeW381X1\nBT5ovjxOyTr6p1N3BrwYP/Mc4vYeEsxWTmscQ7OCWU+Cun41PBLItAV/C8xE8hrN\n3uUyq4sYfpKSKa0uHw2aoZskf4FPHrqBNNEEWr/FUU9pYb4oP3kFtFNFNVzMb2Z4\nMtsHT2dTvwKBgAJAFcV9rqfwOxbOYKzZ9FpL9WyGBm38PrY+PoyRa+YWLYkxB8Zd\nxwLZKQ1AylFQjf/M7ofINJFKbbCVoEsRXuQYkhGa5L2SRYmtf/9iT1kQwLMy+GWo\nXO8ZVgfqcsWhpqGYIDB84X+WZE2tBLUvu7O/4Ri1w7oobLUeXPoHEchBAoGADbaJ\n4hYZw5VKR3C15a3HtJ6DnNVcbBQkWpjiSUb1NcdnwAl9i63ed3jx22lWnPVIxQ1a\n1yz6wF+yryq04waEbPN2xQlJsM7+HSBDjKf2CmzX+Tqi1P2A0j+iviuhR85xEdN8\n7muw8N4K5wMFOwi1kzO7EuFp3GxEjGdNf6srPS8CgYEAr/PE5H1jziCLWtRltMAQ\nf0THOKw+qzn2pGfMahp8QJo+csxudqYXjPWMrTwnAft73alyo/bU71/E0hrHn9rg\nYPrft/Vgb9aU6fNaJI3e4tGohhE312hhiURxsL4Ggh7BCMs4rXkpZhdxJ1ZX3Egq\nOJvD7/MG98ZO60MVQp9CV5o=\n-----END PRIVATE KEY-----\n",
+  "client_email": "panorama-object-detection@savvy-webbing-368209.iam.gserviceaccount.com",
+  "client_id": "111103815003491795145",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/panorama-object-detection%40savvy-webbing-368209.iam.gserviceaccount.com"
+}

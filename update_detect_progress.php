@@ -78,10 +78,44 @@ function upload_result($pdo, $result_str_file_name, $panorama_id, $annotation_id
         $statement->bindValue(5, $phi);
         $statement->bindValue(6, $url);
 
+        $statement->execute();
+    }
+}
+
+function upload_regions($pdo, $panorama_id){
+
+    $json_str = file_get_contents("output_file/" . $panorama_id . ".json");
+
+    $json_data = json_decode($json_str, true);
+
+    // echo "json data:\n";
+
+    // var_dump($json_data);
+
+    $regions = $json_data["regions"];
+
+    for($i = 0; $i < count($regions); $i++){
+
+        $data = $regions[$i];
+
+        $img_file_path = $data["img_file_path"];
+        $region_id = $data["region_id"];
+        $top_left_x_cubemap = $data["top_left_x_cubemap"];
+        $top_left_y_cubemap = $data["top_left_y_cubemap"];
+
+        $sql = 'insert into recognized_regions(panorama_id, img_file_path, region_id, top_left_x_cubemap, top_left_y_cubemap) values(:panorama_id, :img_file_path, :region_id, :top_left_x_cubemap, :top_left_y_cubemap)';
+
+        $statement = $pdo->prepare($sql);
+
+        $statement->bindValue(':panorama_id', $panorama_id);
+        $statement->bindValue(':img_file_path', $img_file_path);
+        $statement->bindValue(':region_id', $region_id);
+        $statement->bindValue(':top_left_x_cubemap', $top_left_x_cubemap);
+        $statement->bindValue(':top_left_y_cubemap', $top_left_y_cubemap);
 
         $statement->execute();
-
     }
+
 
 }
 
@@ -89,10 +123,10 @@ function upload_result($pdo, $result_str_file_name, $panorama_id, $annotation_id
 // データベースへの接続クラスのインスタンスを生成
 $dbConfig = new DatabaseConfigPanorama();
 
-if($argc < 5){
-    echo "引数たりない\n";
-    exit();
-}
+// if($argc < 5){
+//     echo "引数たりない\n";
+//     exit();
+// }
 
 $pdo = $dbConfig->connect_db();
 
@@ -127,7 +161,7 @@ if($method == 'update-progress'){
     }
 
 }
-elseif($method == 'upload-result'){
+else if($method == 'upload-result'){
 
     // パノラマIDを取得
     $panorama_id = (string)$argv[2];
@@ -143,6 +177,21 @@ elseif($method == 'upload-result'){
 
     // 結果データをアップロード
     upload_result($pdo, $result_str_file_name, $panorama_id, $annotation_id);
+
+}
+else if($method == 'upload-regions'){
+
+    // パノラマIDを取得
+    $panorama_id = (string)$argv[2];
+
+    // 領域データのJSON文字列を取得
+    // $region_json_str = (string)$argv[3];
+
+    // echo "json: " . $region_json_str . " ...\n";
+
+    // 領域データのJSON文字列をデータベースに追加
+    // upload_regions($pdo, $region_json_str, $panorama_id);
+    upload_regions($pdo, $panorama_id);
 
 }
 
