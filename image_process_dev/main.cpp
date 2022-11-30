@@ -625,7 +625,9 @@ int main(int argc, char *argv[])
 
     // 物体領域の取得結果をデータベースにアップ
     // send_region_datas(panorama_id, object_region_json_str);
-    send_region_datas(panorama_id);
+    // 現在はこちらを使用
+    // 画像処理システムのディレクトリを変えたので，動作確認のためコメントアウト
+    // send_region_datas(panorama_id);
 
     for (int i = 0; i < 5; i++)
     {
