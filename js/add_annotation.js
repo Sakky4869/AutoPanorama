@@ -14,84 +14,93 @@ var width, height;
 var os;
 
 /**
- * device orientation eventのabsolute
+ * アノテーション（撮影物体画像）のID
  */
-var absolute;
-
-/**
- * device orientation eventのalpha
- */
-var alpha;
-
-/**
- * device orientation eventのbeta
- */
-var beta;
-
-/**
- * device orientation eventのganma
- */
-var ganma;
-
-var degree;
-
 var annotationID;
 
-async function init() {
+/**
+ * 物体情報取得の際にサーバに画像をアップロードする間隔
+ */
+var searchSpan;
+
+/**
+ * アップローモード機能を使うかどうか
+ * true：アップロードモード
+ */
+var useSearchFunc = false;
+
+async function init(span) {
+
+
+    // 一時画像の撮影間隔を設定
+    searchSpan = span;
+
+    console.log('アップロード間隔:', searchSpan);
+
+    // if(useSearchFunc) $('#recognition-mode').text('　オン');
+    // else $('#recognition-mode').text('　オフ');
+
+    // $('#search-switch').prop('checked', false);
+
+    // 撮影画像のIDを取得
+    annotationID = getAnnotationID();
+    console.log('撮影画像のIDを取得')
 
     // OSを特定
     os = detectOS();
+    console.log('OSを特定')
 
-    // コンパスのキャリブレーションが必要な場合に警告を出す
-    // window.addEventListener('compassneedscalibration', function(event){
-    //     console.log('キャリブレーションが必要');
-    // }, true);
+    // カメラの起動後に説明用モーダル表示
+    // $('#open-candidate-modal-button').trigger('click');
 
-    // デバイスモーションイベントの登録
-    // window.addEventListener('devicemotion', function (event) {
-
-    // }, true);
-
-    // let absolute_event = null;
-
-    // window.addEventListener('deviceorientationabsolute', function (event) {
-    //     console.log('絶対値取得');
-    //     absolute_event = event;
-    // }, true);
-
-    // iPhoneのとき
-    // 特別な処理をする必要があるらしいが，現状は何もしない
-    if (os == 'iphone') {
-        console.log('iphone');
-        // $('#permit').css('display', 'inline');
-        // $('#permit').click(function (e) {
-
-        // });
-    } else if (os == 'android') {
-        console.log('android');
-        // 傾きのイベント発生時に，傾きを取得する関数をセット
-        // window.addEventListener('deviceorientation', getPhoneDirection, true);
-        window.addEventListener('deviceorientationabsolute', getPhoneDirection, true);
-    } else {
-        console.log('PCは非対応');
-    }
-
-
-
+    // ヘルプボタンを押したら，取り方マニュアルのモーダルを表示する
+    $('#help-button').on('click', () => {
+        console.log('click help button');
+        // $('#open-candidate-modal-button').trigger('click');
+        $('#candidate-modal').modal('show');
+    });
 
     // カメラ起動
+    // カメラのデータを取得
     let cameraData = await startCamera();
+
     let video = cameraData['video'];
+    // video = cameraData['video'];
     let width = cameraData['width'];
+    // width = cameraData['width'];
     let height = cameraData['height'];
+    // height = cameraData['height'];
+
+    // 撮影開始
+    startToTakePicture(video, width, height);
+
+    // サーチスイッチが押されたらサーチ開始
+    $('#search-switch').on('click', function () {
+
+        console.log('サーチスイッチ：', $(this).prop('checked'));
+
+        useSearchFunc = $(this).prop('checked');
+
+        if(useSearchFunc == false){
+            let canvas = $('#object-canvas')[0];
+            let ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    })
 
     // 撮影ボタンをクリックしたとき
     $('#take-button').click(function(event){
 
-
+        return;
         // console.log(absolute_event);
 
-        // return;
+        useSearchFunc = !useSearchFunc;
+        console.log('useSearchFunc', useSearchFunc);
+
+        // if(useSearchFunc) $('#recognition-mode').text('　オン');
+        // else $('#recognition-mode').text('　オフ');
+
+        return;
 
         // 撮影
         let annotation = takeAnnotation(video, width, height);
@@ -99,8 +108,6 @@ async function init() {
         // Y軸を中心とする，スマホの傾きを取得
         let direction = degree;//alpha;//getPhoneDirection();
 
-        // 撮影画像のIDを首都奥
-        annotationID = getAnnotationID();
 
         // サーバにアップロード
         uploadAnnotation(annotation, direction, annotationID);
@@ -153,114 +160,6 @@ function floatDecimal(value, n) {
     return Math.floor(value * Math.pow(10, n)) / Math.pow(10, n);
 }
 
-/**
- * デバイスの向きを取得する
- * @param {deviceoorientation} event 傾きイベント
- * @returns イベントで取得できる傾きのうち，地面に垂直な軸を中心とする角度
- */
-function getPhoneDirection(event) {
-
-    // let absolute = event.absolute;
-    absolute = event.absolute;
-    // if(absolute){
-    //     console.log('絶対');
-    // }else{
-    //     console.log('絶対ではない');
-    // }
-    // let alpha = event.alpha;
-    alpha = event.alpha;
-    // let beta = event.beta;
-    beta = event.beta;
-    // let ganma = event.ganma;
-    ganma = event.ganma;
-
-    // let degree;
-    if (os == 'iphone') {
-        degree = event.webkitCompassHeading;
-    } else {
-        degree = compassHeading(alpha, beta, ganma);
-    }
-
-    // let direction;// = '無方向';
-    // if ((337.5 < degree && degree < 360) || (0 < degree && degree < 22.5)) {
-    //     direction = '北';
-    //     // console.log('北');
-    // } else if (22.5 < degree && degree < 67.5) {
-    //     direction = '北東';
-    //     // console.log('北東');
-    // } else if (67.5 < degree && degree < 112.5) {
-    //     direction = '東';
-    //     // console.log('東');
-    // } else if (112.5 < degree && degree < 157.5) {
-    //     direction = '東南';
-    //     // console.log('東南');
-    // } else if (157.5 < degree && degree < 202.5) {
-    //     direction = '南';
-    //     // console.log('南');
-    // } else if (202.5 < degree && degree < 247.5) {
-    //     direction = '南西';
-    //     // console.log('南西');
-    // } else if (247.5 < degree && degree < 292.5) {
-    //     direction = '西';
-    //     // console.log('西');
-    // } else if (292.5 < degree && degree < 337.5) {
-    //     direction = '北西';
-    //     // console.log('北西');
-    // }
-
-    degree = floatDecimal(degree, 3);
-    absolute = floatDecimal(absolute, 3);
-    alpha = floatDecimal(alpha, 3);
-    beta = floatDecimal(beta, 3);
-    ganma = floatDecimal(ganma, 3);
-
-    // $('#direction-value').html(direction + '\n' + degree);
-    // $('#absolute-value').html(absolute);
-    // $('#alpha-value').html(alpha);
-    // $('#beta-value').html(beta);
-    // $('ganma-value').html(ganma);
-
-    // return alpha;
-    return degree;
-
-}
-
-/**
- * 向きを補正する
- * Androidではこれが必要らしい．現状は未使用．
- * @param {float} alpha アルファ
- * @param {float} beta ベータ
- * @param {float} ganma ガンマ
- * @returns 向きの情報
- */
-function compassHeading(alpha, beta, ganma) {
-
-    let degToRad = Math.PI / 180;
-
-    let x = beta ? beta * degToRad : 0;
-    let y = ganma ? ganma * degToRad : 0;
-    let z = alpha ? alpha * degToRad : 0;
-
-    let cX = Math.cos(x);
-    let cY = Math.cos(y);
-    let cZ = Math.cos(z);
-    let sX = Math.sin(x);
-    let sY = Math.sin(y);
-    let sZ = Math.sin(z);
-
-    let vX = - cZ * sY - sZ * sX * cY;
-    let vY = - sZ * sY + cZ * sX * cY;
-
-    let heading = Math.atan(vX / vY);
-
-    if (vY < 0) {
-        heading += Math.PI;
-    } else if (vX < 0) {
-        heading += 2 * Math.PI;
-    }
-
-    return heading * (180 / Math.PI);
-}
 
 
 
@@ -279,25 +178,13 @@ function getAnnotationID() {
 async function startCamera() {
 
     try {
-        video = $('#camera-video')[0]; // document.querySelector('#video') // <1>
+        video = document.querySelector('#camera-video') // <1>
 
         const options = {
             video: {
                 facingMode: 'environment',
-                // facingMode: 'front',
-                // width: {
-                //     min: 0,
-                //     ideal: 2250,
-                //     max: 2250
-                // },
-                // height: {
-                //     min: 0,
-                //     ideal: 4000,
-                //     max: 4000
-                // },
                 aspectRatio: {
-                    // exact: 4000 / 2250
-                    exact: 16 / 9
+                    exact: 4 / 3
                 }
             },
             audio: false,
@@ -316,12 +203,46 @@ async function startCamera() {
             width,
             height
         } = settings;
-        // console.log('width', width, 'height', height);
+
+        console.log('カメラ起動', 'width', width, 'height', height);
+        // $('#camera-video').css('width', width);
+        // $('#camera-video').css('height', height);
+        // $('#camera-video')[0].videoWidth = width;
+        // $('#camera-video')[0].videoHeight = height;
+        // console.log('camera-video width:', width, 'height:', height);
+        // console.log($('#camera-video')[0].srcObject);
+        // $('#object-canvas').css('display', 'inline');
+        // $('#camera-canvas').css('display', 'none');
+        // $('#camera-image').css('display', 'none');
         return { 'video': video, 'width': width, 'height': height };
     } catch (err) {
         console.error(err);
     }
 }
+
+/**
+ * 撮影物体からの名称取得を正確に行うために，定期的に画像をサーバへアップロードする
+ */
+function startToTakePicture(video, width, height){
+
+    // 定期的にWebカメラで取得した画像をサーバへアップロード
+    setInterval(() => {
+
+        console.log('take picture', 'span', searchSpan);
+        // 撮影
+        let annotation = takeAnnotation(video, width, height);
+
+        if(useSearchFunc == false) return;
+
+        // サーバにアップロード
+        uploadAnnotationTemp(annotation,annotationID);
+
+        console.log('uplaoded');
+
+    }, searchSpan);
+
+}
+
 
 /**
  * 写真を撮影して，一時保存した画像データのURLを取得する
@@ -332,20 +253,24 @@ async function startCamera() {
  */
 function takeAnnotation(video, width, height) {
     let canvasCamera = $('#camera-canvas');
+    // $('#camera-canvas').css('display', 'inline');
     canvasCamera.attr('width', width);
     canvasCamera.attr('height', height);
+    // console.log('take annotation width', width, 'height', height);
+    // console.log(video);
+    // return;
     const context = canvasCamera[0].getContext('2d');
     context.drawImage(video, 0, 0, width, height);
-    let dataUrl = canvasCamera[0].toDataURL('image/png');
+    let dataUrl = canvasCamera[0].toDataURL('image/jpeg', 1);
     $('#camera-image').attr('src', dataUrl);
     // PHPで受け取るために，プレフィクスを削除
     dataUrl = dataUrl.replace(/^data:\w+\/\w+;base64,/, '');
-    $('#camera-image').css('display', 'inline');
+    // $('#camera-image').css('display', 'inline');
 
-    $('#camera-video')[0].srcObject.getTracks().forEach(track => {
-        track.stop();
-    });
-    $('#camera-video').css('display', 'none');
+    // $('#camera-video')[0].srcObject.getTracks().forEach(track => {
+    //     track.stop();
+    // });
+    // $('#camera-video').css('display', 'none');
     return dataUrl;
 }
 
@@ -359,38 +284,13 @@ function uploadAnnotation(annotation, direction, annotationID) {
 
     let panoramaID = getPanoramaID();
 
-    // サーバサイドが未開発のため，臨時データを用意
-    // let response = {
-    //     'annotation-id': '2022-09-18_17-33-00', 'panorama-id': '2022-09-18_17-33-00',
-    //     'images' : [
-    //         {'index': '0', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-    //         'theta': 1.87, 'phi': 3.10},
-    //         {'index': '1', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-    //         'theta': 1.87, 'phi': 3.10},
-    //         {'index': '2', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-    //         'theta': 1.87, 'phi': 3.10},
-    //         {'index': '3', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-    //         'theta': 1.87, 'phi': 3.10},
-    //         {'index': '4', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-    //         'theta': 1.87, 'phi': 3.10},
-    //         {'index': '5', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-    //         'theta': 1.87, 'phi': 3.10},
-    //         {'index': '6', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-    //         'theta': 1.87, 'phi': 3.10},
-    //         {'index': '7', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-    //         'theta': 1.87, 'phi': 3.10},
-    //         {'index': '8', 'url': './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00',
-    //         'theta': 1.87, 'phi': 3.10},
-    //     ]
-    // };
-
-    // showCandidateAreas(response);
-
     // return;
 
     let data = {
-        'method': 'add-annotation', 'annotation': annotation,
-        'direction': direction, 'annotation-id': annotationID,
+        'method': 'add-annotation',
+        'annotation': annotation,
+        'direction': direction,
+        'annotation-id': annotationID,
         'panorama-id': panoramaID,
     };
 
@@ -398,20 +298,104 @@ function uploadAnnotation(annotation, direction, annotationID) {
         type: 'POST',
         url: './add_annotation_server.php',
         data: JSON.stringify(data),
-        // data: {
-        //     'method': 'add-annotation', 'annotation': annotation,
-        //     'direction': direction, 'annotation-id': annotationID,
-        //     'panorama-id': panoramaID,
-        // },
         dataType: 'json',
         contentType: 'application/json',
-        // timout: 120000,
         success: function (response) {
-            // showCandidateAreas(response);
             console.log(response);
             start_wait_image_process();
         }
     });
+}
+
+
+/**
+ * 撮影物体から名称を取得するための一時画像をアップロードする
+ * @param {string} annotation base64に変換した画像データ
+ * @param {string} annotationID アノテーションID
+ */
+function uploadAnnotationTemp(annotation, annotationID) {
+
+    let panoramaID = getPanoramaID();
+
+    let data = {
+        // 'method': 'add-annotation',
+        'method': 'upload-annotation-temp',
+        'annotation': annotation,
+        // 'direction': direction,
+        'annotation-id': annotationID,
+        'panorama-id': panoramaID,
+    };
+
+    $.ajax({
+        type: 'POST',
+        url: './add_annotation_server.php',
+        data: JSON.stringify(data),
+        dataType: 'json',
+        contentType: 'application/json',
+        success: function (response) {
+            console.log('content:', response);
+            showDetectResult(response['detect-result']['objects'], response['detect-result']['width'], response['detect-result']['height']);
+            // start_wait_image_process();
+        }
+    });
+}
+
+function showDetectResult(detectResult, width, height){
+
+    if(useSearchFunc == false) return;
+
+    console.log('detect result len:', detectResult.length);
+
+    console.log('picture width', width, 'height', height);
+
+    for(let i = 0; i < detectResult.length; i++){
+
+        let data = detectResult[i];
+        let name = data['name'];
+        console.log('name', name);
+        let vertices = data['vertices'];
+        // console.log('vertices', vertices);
+
+        let canvasCamera = $('#object-canvas');
+        let videoElement = $('#camera-video');
+        let clientRect = videoElement[0].getBoundingClientRect();
+        let videoPosX = window.scrollX + clientRect.left;
+        let videoPosY = window.scrollY + clientRect.top;
+        // console.log('video x:', videoPosX, 'y:', videoPosY);
+        canvasCamera.css('top', videoPosY);
+        canvasCamera.css('left', videoPosX);
+        canvasCamera.css('display', 'inline');
+        // console.log('video width:', videoElement.css('width'), 'video height:', videoElement.css('height'));
+        canvasCamera.css('width', parseInt(videoElement.css('width')));
+        canvasCamera.css('height', parseInt(videoElement.css('height')));
+        canvasCamera[0].width = width;
+        canvasCamera[0].height = height
+        const context = canvasCamera[0].getContext('2d');
+        // canvasCamera.attr('width', width);
+        // canvasCamera.attr('height', height);
+        context.beginPath();
+        // context.fillStyle = "rgba(255, 255, 255, 0)";
+        // console.log('canvas width:', canvasCamera[0].width, 'height:', canvasCamera[0].height);
+        // context.fillRect(0, 0, canvasCamera[0].width, canvasCamera[0].height);
+        let posX = vertices[0][0];
+        let posY = vertices[0][1];
+        let object_width = vertices[1][0] - vertices[0][0];
+        let object_height = vertices[2][1] - vertices[1][1];
+        context.rect(posX, posY, object_width, object_height);
+        context.strokeStyle = 'rgba(0, 255, 0, 255)';
+        context.lineWidth = 2;
+        context.stroke();
+        context.font = '20px Roboto';
+        context.fillStyle = "rgba(0, 255, 0, 255)";
+        let textYPosAdjust = -5;
+        if(posY < 15){
+            posY += object_width - 5;
+        }
+        context.fillText(name, posX, posY + textYPosAdjust);
+        console.log('font:', context.font);
+        // console.log('width', width, 'height', height);
+        // context.drawImage(video, 0, 0, width, height);
+    }
 }
 
 function start_wait_image_process(){

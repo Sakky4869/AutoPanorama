@@ -122,12 +122,17 @@ $panorama_datas = get_panorama_datas();
             $panorama = $panorama_datas[$i];
             $panorama_id = $panorama['panorama_id'];
             $panorama_name = $panorama['panorama_name'];
+            // 画像ファイルを読み込み
+            $panorama_preview_url = $app_config->get_img_save_base_dir() . '/panorama_imgs/' . $panorama_id . '/preview.jpg';
+            // base64形式に変換
+            $img = base64_encode(file_get_contents($panorama_preview_url));
     ?>
             <!-- プレビューコンテンツ -->
             <div class="card preview-card" data-panorama-id="<?php echo  $panorama_id; ?>">
 
                 <!-- 画像ファイルのパスを，パノラマのIDに設定 -->
-                <img class="card-img-top" src="./panorama_imgs/<?php echo $panorama_id; ?>/preview.jpg" alt="プレビュー画像">
+                <!-- <img class="card-img-top" src="./panorama_imgs/<?php echo $panorama_id; ?>/preview.jpg" alt="プレビュー画像"> -->
+                <img class="card-img-top" src="data:image/jpeg;base64,<?php echo $img; ?>" alt="プレビュー画像">
 
                 <div class="card-body">
 

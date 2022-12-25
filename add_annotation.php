@@ -73,10 +73,16 @@ if($app_config->check_use_login_func() == true){
         <div id="video-area">
 
             <!-- カメラを表示するvideo -->
-            <video autoplay muted playsinline id="camera-video"></video>
+            <video autoplay muted playsinline id="camera-video">
+            </video>
+
+            <!-- 検出した物体の位置を可視化するcanvas -->
+            <canvas id="object-canvas"></canvas>
 
             <!-- 撮影データを画像化するために，一時的に撮影データを格納する -->
-            <canvas id="camera-canvas"></canvas>
+            <canvas id="camera-canvas">
+            </canvas>
+
 
             <!-- 撮影結果を表示するimg -->
             <img id="camera-image" src="" alt="">
@@ -90,10 +96,10 @@ if($app_config->check_use_login_func() == true){
         <div id="button-area">
 
             <!-- 取り直しボタン -->
-            <div class="action-button" id="retake-button">
+            <!-- <div class="action-button" id="retake-button">
                 <img class="icon" src="./imgs/retake_picture_icon.svg" alt="">
                 <p class="icon-text">取り直す</p>
-            </div>
+            </div> -->
 
             <!-- 送信ボタン -->
             <div class="action-button" id="send-button">
@@ -103,7 +109,8 @@ if($app_config->check_use_login_func() == true){
 
             <!-- 撮影ボタン -->
             <div class="action-button" id="take-button">
-                <img class="icon" src="./imgs/take_picture_icon.svg" alt="">
+                <!-- <img class="icon" src="./imgs/take_picture_icon.svg" alt=""> -->
+                <img class="icon" src="./imgs/prohibition.svg" alt="">
                 <p class="icon-text">撮影</p>
             </div>
 
@@ -114,6 +121,19 @@ if($app_config->check_use_login_func() == true){
                 <p class="icon-text">ヘルプ</p>
             </div>
         </div>
+
+        <div style="color: white; display: flex; flex-direction: row; justify-content: space-around;">
+            <!-- <p class="icon-text">物体認識</p> -->
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="search-switch">
+                <label class="form-check-label" for="search-switch">サーチ</label>
+            </div>
+            <!-- <p id="recognition-mode" class="icon-text">　オン</p> -->
+        </div>
+
+        <!-- <div class="progress">
+            <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
+        </div> -->
 
         <!-- <div id="debug-area">
             <div class="debug-row">
@@ -140,6 +160,9 @@ if($app_config->check_use_login_func() == true){
 
     </div>
 
+
+
+
     <!-- モーダルウィンドウを表示するためのボタン -->
     <!-- 非表示にして，JSからクリックする -->
     <button id="open-candidate-modal-button" type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#candidate-modal"></button>
@@ -150,18 +173,20 @@ if($app_config->check_use_login_func() == true){
         <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="candidate-modal-title">画像処理の待機中</h5>
+                    <h5 class="modal-title" id="candidate-modal-title">取り方マニュアル</h5>
                         <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
                 </div>
                 <div class="modal-body">
 
                     <!-- 画像処理システムの結果待ちのときに表示するエリア -->
-                    <div class="container-sm" id="wait-area">
+                    <!-- <div class="container-sm" id="wait-area">
                         <button id="progress-value" class="btn btn-primary" type="button" disabled>
                             <span style="margin-right: 5px;" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             0%
                         </button>
-                    </div>
+                    </div> -->
+
+                    <p>取り方の説明をここに載せる．</p>
 
                     <!-- 候補画像一覧を表示するエリア -->
                     <div class="container-sm" id="select-box-area"></div>
@@ -174,6 +199,7 @@ if($app_config->check_use_login_func() == true){
                 </div>
 
                 <div id="annotation-modal-footer" class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
                     <button id="cancel-annotation-button"  type="button" class="btn btn-secondary" data-bs-dismiss="modal">この中にはない</button>
                     <button id="decide-annotation-button" type="button" class="btn btn-primary">決定</button>
                 </div>
@@ -194,8 +220,13 @@ if($app_config->check_use_login_func() == true){
     <script>
         $(document).ready(async function() {
 
+            // アノテーション画像の一時アップロード間隔を，データベースから取得しておく
+            let uploadSpan = <?php echo $app_config->get_annotation_temp_upload_span(); ?>;
+            // console.log(uploadSpan);
+
             // $('#open-candidate-modal-button').trigger('click');
-            await init();
+            await init(uploadSpan);
+            // await init(5000);
         });
     </script>
 

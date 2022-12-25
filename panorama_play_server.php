@@ -2,6 +2,10 @@
 ini_set('display_erros', 'On');
 
 require_once(dirname(__FILE__) . '/server_common.php');
+require_once(dirname(__FILE__) . '/app_config.php');
+
+// アプリの設定クラスを初期化
+$app_config = new AppConfig();
 
 // パノラマのオリジナル画像のURLを取得する関数
 // 取得が，クライアントだけでできることがわかったので，実装しない
@@ -51,11 +55,15 @@ function get_panorama_annotations($panorama_id){
 
     foreach($statement as $row){
 
+        $url = $app_config->get_img_save_base_dir() . '/annotation_imgs/' . $row['annotation_id'] . '.jpg';
+        $data = base64_encode(file_get_contents($url));
+
         // データを作成
         $data = array(
             'annotation-id' => $row['annotation_id'],
             'theta' => $row['theta'],
-            'phi' => $row['phi']
+            'phi' => $row['phi'],
+            'img' => 'data:image/jpg;base64,' . $data,
         );
 
         // 結果の配列に追加

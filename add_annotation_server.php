@@ -1,45 +1,31 @@
 <?php
 
 require_once(dirname(__FILE__) . '/server_common.php');
+require_once(dirname(__FILE__) . '/app_config.php');
+
+// アプリの設定クラスを初期化
+$app_config = new AppConfig();
+
+// file_put_contents('./logs/log.txt', 'img_base_dir：' . $img_base_dir . "\n", FILE_APPEND);
 
 function add_annotation($data)
 {
 
-    $annotation_id = '2022-09-18_17-33-00';//$data['annotation-id'];
+    // $annotation_id = '2022-09-18_17-33-00';
     $annotation_id = $data['annotation-id'];
     $annotation_base64_jpeg = $data['annotation'];
-    $panorama_id = '2022-09-18_17-33-00';//$data['panorama-id'];
+    // $panorama_id = '2022-09-18_17-33-00';
     $panorama_id = $data['panorama-id'];
-    $direction = $data['direction'];
+    // $direction = $data['direction'];
 
 
     // file_put_contents('./logs/log.txt', 'データ pano: ' . $panorama_id . ' anno: ' . $annotation_id . ' angle: ' . $direction . "\n", FILE_APPEND);
 
-    $img_path = './annotation_imgs/' . $annotation_id . '.jpg';
+    $img_path =  './annotation_imgs/' . $annotation_id . '.jpg';
     // $dir_name = './candidate_imgs/' . $panorama_id . '/' . $annotation_id + '/';
     // $dir_name = '../../panorama_images/candidate_imgs/' . $panorama_id . '/' . $annotation_id + '/';
 
     file_put_contents($img_path, base64_decode($annotation_base64_jpeg));
-
-    // 候補画像を保存するディレクトリを作成する
-    // ディレクトリ作成時のマスク設定を退避
-    // $mask = umask();
-
-    // マスク設定を一時的に消す
-    // umask(000);s
-
-
-    // ディレクトリを再帰的に作成
-    // mkdir($dir_name, 0777, true);
-
-    // if(chmod('./candidate_imgs/' . $panorama_id . '/', 0777)){
-
-    // }
-
-
-    // file_put_contents('./logs/log.txt', 'ディレクトリ作成 ' . $dir_name . "\n", FILE_APPEND);
-    // マスク設定を戻す
-    // umask($mask);
 
     // -- このタイミングで画像処理プログラムを非同期実行する ----
     exec('./image_process ' . $panorama_id . ' ' . $annotation_id . ' ' . $direction . ' > /dev/null &');
@@ -67,6 +53,102 @@ function add_annotation($data)
     );
 
     $json_manager = new JsonManager();
+
+    $json = $json_manager->get_json_response($ret);
+
+    return $json;
+}
+
+/**
+ * 撮影物体からの名称取得を正確に行うため，一時的に撮影画像をアップする
+ * 2022/12/15
+ * いったんアップロードのみ行う．うまくいったら物体認識した結果をJSONで返すようにする
+ */
+function upload_annotation_temp($data, $app_config){
+    // $annotation_id = '2022-09-18_17-33-00';
+    $annotation_id = $data['annotation-id'];
+    $annotation_base64_jpeg = $data['annotation'];
+    // $panorama_id = '2022-09-18_17-33-00';
+    $panorama_id = $data['panorama-id'];
+    // $direction = $data['direction'];
+
+
+    // 画像の保存先であるホームディレクトリの画像処理システムのパス
+    $img_base_dir =  $app_config->get_img_save_base_dir();
+
+    // file_put_contents('./logs/log.txt', '探索パス：' . $img_base_dir . '/annotation_imgs_temp/*.jpg' . "\n", FILE_APPEND);
+
+    // すでにアップロードされている画像数を記録
+    $temp_img_count = 0;
+
+    $img_files = glob($img_base_dir . '/annotation_imgs_temp/*.jpg');
+
+    // file_put_contents('./logs/log.txt', '一時画像のファイル数：' . count($img_files) . "\n", FILE_APPEND);
+
+
+    // 保存するディレクトリ内の画像ファイルを探索
+    foreach ($img_files as $key => $value) {
+
+        // 画像ファイルの名前にアノテーションIDが含まれている場合のみ，画像数を１つ増やす
+        if(strpos($value, $annotation_id) !== false){
+            $temp_img_count++;
+        }
+    }
+
+    // file_put_contents('./logs/log.txt', '一時画像のファイル数：' . (string)$temp_img_count . "\n", FILE_APPEND);
+
+    //　画像のファイル名
+    $img_path =  $img_base_dir . '/annotation_imgs_temp/' . $annotation_id . '_' . sprintf("%'.04d", $temp_img_count) . '.jpg';
+
+    // file_put_contents('./logs/log.txt', '一時画像のファイルパス：' . $img_path . "\n", FILE_APPEND);
+
+    file_put_contents($img_path, base64_decode($annotation_base64_jpeg));
+
+    // file_put_contents('./logs/log.txt', '一時画像保存完了：' . $img_path . "\n", FILE_APPEND);
+
+    $output = null;
+    // ---- 撮影画像から物体を認識する ----
+    // $command = 'export GOOGLE_APPLICATION_CREDENTIALS="/home/sakai/AutoPanorama_img_proc/savvy-webbing-368209-93035ab18f3a.json" && '
+    //             . $img_base_dir . '/run_detect_annotaton_objects.sh ' . $img_path;
+
+    putenv('GOOGLE_APPLICATION_CREDENTIALS=/home/sakai/AutoPanorama_img_proc/savvy-webbing-368209-93035ab18f3a.json');
+    // putenv('GOOGLE_APPLICATION_CREDENTIALS="/home/sakai/AutoPanorama_img_proc/savvy-webbing-368209-93035ab18f3a.json"');
+    $command = $img_base_dir . '/run_detect_annotation_objects.sh ' . $img_path . ' 2>&1';
+
+    // file_put_contents('./logs/log.txt', 'ENV GOOGLE_APPLICATION_CREDENTIALS：' . getenv('GOOGLE_APPLICATION_CREDENTIALS') . "\n", FILE_APPEND);
+
+    // file_put_contents('./logs/log.txt', 'command: ' . $command . "\n", FILE_APPEND);
+
+    // exec($command . ' >> ./logs/log.txt', $output, $retval);
+    exec($command, $output, $retval);
+
+    // exec('echo test >> ./logs/log.txt');
+
+    // file_put_contents('./logs/log.txt', 'retval：' . $retval . "\n", FILE_APPEND);
+
+    // file_put_contents('./logs/log.txt', 'outputの長さ：' . count($output) . "\n", FILE_APPEND);
+
+    // file_put_contents('./logs/log.txt', 'output：' . $output[0] . "\n", FILE_APPEND);
+
+    $json_manager = new JsonManager();
+
+    // 物体画像の認識結果をJSON文字列で受け取る
+    $result_detect_annotation_object_str = $output[0];
+
+    // JSON配列に変換
+    $result_detect_annotation_object = $json_manager->get_array_from_json($result_detect_annotation_object_str);
+
+    // foreach($output as $key => $value){
+
+    //     file_put_contents('./logs/log.txt', $key . '：' . $value . "\n", FILE_APPEND);
+    // }
+
+    // file_put_contents('./logs/log.txt', '物体認識の結果：' . var_dump($output) . "\n", FILE_APPEND);
+
+    $ret = array(
+        'result' => 'success',
+        'detect-result' => $result_detect_annotation_object
+    );
 
     $json = $json_manager->get_json_response($ret);
 
@@ -233,6 +315,12 @@ if ($post_manager->check_method_equals('add-annotation')) {
     // header( "Content-Type: application/json; charset=utf-8");
 
     // echo $json_ret;
+}
+
+if($post_manager->check_method_equals('upload-annotation-temp')){
+
+    $json_ret = upload_annotation_temp($json_array, $app_config);
+
 }
 
 if($post_manager->check_method_equals('decide-annotation')){

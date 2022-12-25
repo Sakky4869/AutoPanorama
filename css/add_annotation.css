@@ -15,7 +15,11 @@ nav{
 
 /* ビデオの親 */
 #video-area{
-    margin-top: 20px;
+    /* もともとこれ */
+    /* margin-top: 20px; */
+    /* サイズ調整のためこれを利用 */
+    margin-top: 10px;
+
     margin-bottom: 10px;
     display: flex;
     flex-direction: column;
@@ -24,7 +28,13 @@ nav{
 
 /* カメラを表示するvideo */
 #camera-video{
-    max-width: 80%;
+    /* max-width: 80%; */
+    /* width: 80%; */
+    width: 100%;
+    /* position: relative;
+    top: 0px;
+    left: 0px; */
+    /* display: none; */
 }
 
 /* 撮影データを画像化するために一時的に保存するcanvas */
@@ -32,12 +42,29 @@ nav{
 #camera-canvas{
     /* max-width: 80%; */
     display: none;
+    /* position: relative; */
+    /* position: absolute; */
+    /* top: 0px;
+    left: 0px; */
+    /* max-width:100%; */
+    /* max-width: 80%; */
+}
+
+#object-canvas{
+    display: none;
+    /* max-width: 80%; */
+    width: 100%;
+    /* max-width: 100%; */
+    position: absolute;
+    top: 0px;
+    left: 0px;
 }
 
 /* 撮影結果を表示するimg */
 /* 撮影したあとだけ表示 */
 #camera-image{
-    max-width: 80%;
+    /* max-width: 80%; */
+    width: 100%;
     display: none;
 }
 
@@ -65,7 +92,8 @@ nav{
     flex-direction: row;
     justify-content: flex-end;
     width: 80%;
-    height: 10px;
+    /* height: 10px; */
+    height: 80px;
     font-size: smaller;
 }
 
@@ -79,8 +107,14 @@ nav{
 }
 /* ボタンの画像の共通クラス */
 .icon{
-    height: 50px;
+    /* height: 50px; */
+    /* width: 10%; */
+    height: 30px;
     margin-bottom: 3px;
+}
+
+.icon-text{
+    font-size: small;
 }
 
 /* 撮影ボタン */

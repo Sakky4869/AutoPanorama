@@ -319,6 +319,7 @@ function setAnnotation(annotationData) {
     let annotationID = annotationData['annotation-id'];
     let theta = parseFloat(annotationData['theta']);
     let phi = parseFloat(annotationData['phi']);
+    let img = annotationData['img'];
     // console.log('theta', theta, 'phi', phi);
     // let annotationUrl = annotationData['annotation-url'];
 
@@ -337,7 +338,8 @@ function setAnnotation(annotationData) {
     annotationBox.lookAt(camera.position);
     // annotationBox.name = 'annotation,' + annotationID + ',' + annotationUrl;
     annotationBox.name = 'annotationBox';
-    annotationBox.userData.annotationUrl = './annotation_imgs/' + annotationID + '.jpg';
+    // annotationBox.userData.annotationUrl = './annotation_imgs/' + annotationID + '.jpg';
+    annotationBox.userData.annotationUrl = img;
     annotationBox.material.transparent = true;
     annotationBox.material.alphaToCoverage = true;
     annotationBox.material.opacity = 1;
