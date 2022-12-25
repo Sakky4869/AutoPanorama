@@ -142,7 +142,18 @@ if($app_config->check_use_login_func() == true){
             let panoramaID = getPanoramaID();
 
             // パノラマ画像のURLを取得
-            let panoramaOriginUrl = getPanoramaOriginUrl(panoramaID);
+            // let panoramaOriginUrl = getPanoramaOriginUrl(panoramaID);
+
+            <?php
+
+            $panorama_origin_url = $app_config->get_img_save_base_dir() . '/panorama_imgs/' . $_GET['panorama-id'] . '/origin.jpg';
+
+            $img = base64_encode(file_get_contents($panorama_origin_url));
+
+            ?>
+
+            // パノラマ画像のURLを取得
+            let panoramaOriginUrl = "data:image/jpeg;base64,<?php echo $img; ?>";
 
             // console.log('panorama url', panoramaOriginUrl);
 
