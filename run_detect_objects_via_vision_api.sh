@@ -1,2 +1,0 @@
-export GOOGLE_APPLICATION_CREDENTIALS="savvy-webbing-368209-93035ab18f3a.json"
-python detect_objects_via_vision_api.py

@@ -14,6 +14,7 @@
 # パノラマ関係のディレクトリ
 panorama_imgs/*
 annotation_imgs/*
+annotation_imgs_temp/*
 candidate_imgs/*
 
 # ログディレクトリ
