@@ -11,6 +11,7 @@ def search_object_in_cubemap(input_word, object_name_list, object_name_and_posit
     # 出力リスト
     output_list = []
 
+    # 類似度を使って，物体の位置を探索する
     output_list = search_object_by_calc_similarity(input_word, object_name_list, object_name_and_position_list, model)
 
     # output_list = output_list[0]
@@ -68,6 +69,7 @@ def get_word_data_from_db(connection):
                 point_float = list(map(float, data.split(',')))
                 point = list(map(int, point_float))
                 point_list.append(point)
+
             # 取得したデータをリストに格納する
             obj_name_and_position_list.append({
                 'word': object_name,
@@ -86,21 +88,25 @@ def get_word_data_from_db(connection):
             #               )
     except MySQLdb.Error as e:
         print('MySQLdb.Error: ', e)
-    # finally:
-    #     cursor.close()
-    #     connection.close()
 
     # 重複を除く
     obj_name_list = list(set(obj_name_list))
-
-    # print('word:')
-    # for obj_name in obj_name_list:
-    #     print('\t{}'.format(obj_name))
 
     return [obj_name_list, obj_name_and_position_list]
 
 
 def search_object_by_calc_similarity(input_word, object_name_list, object_name_and_position_list, model):
+    """物体名称の類似度を使い，同一物体を探索する
+
+    Args:
+        input_word (string): アノテーションの一時画像から取得した物体名称
+        object_name_list (list): 物体名称のリスト．これを使って類似度から探索する
+        object_name_and_position_list (list): 物体名称と座標のリスト
+        model (model): 類似度を計算するモデル．
+
+    Returns:
+        list: 最大類似度を持つ物体名称とその座標データ
+    """
 
     # nlp = None
     # 類似度算出のためのモデルをロード spacy
@@ -254,6 +260,7 @@ def search_object_by_calc_hsv_hist(taked_picture, obj_db, cubemap):
     # ヒストグラムの類似度上位を出力
     # 出力として採用する数
     adopt_count = 1
+
     # obj_db = sorted(obj_db, key=lambda d: d['similarity_hist_hsv'], reverse=True)
     obj_db = sorted(obj_db, key=lambda d: d['similarity_hist_hsv'], reverse=True)[0:adopt_count]
 

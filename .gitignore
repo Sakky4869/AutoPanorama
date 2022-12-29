@@ -33,3 +33,9 @@ output_file/*
 selective_search_cpp/*
 clip_sample_python/*
 w2v_models/*
+
+# パノラマとキューブマップの座標変換データのファイル
+pos_map.csv
+
+# 不要になったファイル
+old/*

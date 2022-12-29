@@ -26,6 +26,8 @@ using json = nlohmann::json;
 
 // #define USE_DB 1
 #define USE_DB 0
+// #define CREATE_POSITION_MAP 1
+#define CREATE_POSITION_MAP 0
 
 /**
  * ---- 使い方 ----
@@ -253,6 +255,9 @@ int main(int argc, char *argv[])
     }
 
     imwrite("output_img/cubemap.jpg", cubemap);
+
+
+#if CREATE_POSITION_MAP == 0
 
     // ---- キューブマップのFaceを2x2から10x10までのスケールでグリッド状に分割 ----
     // ---- 分割した画像を書き出す ----
@@ -614,12 +619,12 @@ int main(int argc, char *argv[])
     // ---- JSONファイルに保存 ----
 
     // JSON文字列に書き出し
-    string object_region_json_str = object_region_json.dump();
+    // string object_region_json_str = object_region_json.dump();
 
     // JSONファイルへ書き出し
-    ofstream ofs("output_file/" + panorama_id + ".json");
-    ofs << object_region_json_str;
-    ofs.close();
+    // ofstream ofs("output_file/" + panorama_id + ".json");
+    // ofs << object_region_json_str;
+    // ofs.close();
 
     cout << "write object region" << endl;
 
@@ -637,6 +642,7 @@ int main(int argc, char *argv[])
 
     return 0;
 
+#endif
 
 #if USE_DB
     progress_count++;
@@ -655,6 +661,41 @@ int main(int argc, char *argv[])
         // write_log(e.msg);
         write_log_opencv("create position map from cubemap to panorama at 168");
     }
+
+    string data = "pos_x_cubemap,pos_y_cubemap,pos_x_panorama,pos_y_panorama\n";
+
+    for (int y = 0; y < cubemap.rows; y++)
+    {
+        for (int x = 0; x < cubemap.cols; x++)
+        {
+            // string command = "php ./update_detect_progress.php upload-result " + panorama_id + " " + annotation_id + " " + result;
+            int pos_x_panorama = position_map.at<Vec2i>(y, x)[0];
+            int pos_y_panorama = position_map.at<Vec2i>(y, x)[1];
+
+            cout << "CPP: " << x << " , " << y << " => " << pos_x_panorama << " , " << pos_y_panorama << endl;
+
+            data += to_string(x) + "," + to_string(y) + "," + to_string(pos_x_panorama) + "," + to_string(pos_y_panorama) + "\n";
+
+            // string command = "php ./upload_position_map.php " + to_string(x) + " " + to_string(y) + " " + to_string(pos_x_panorama) + " " + to_string(pos_y_panorama);
+
+            // cout << "cmd: " << command << endl;
+            // write_log("exec: " + command);
+            // cout << endl << "exec: " + command << endl;
+            // debugl("exec: " + command);
+
+            // system(command.c_str());
+        }
+    }
+
+    cout << "データ書き込み開始" << endl;
+
+    ofstream ofs("pos_map.csv");
+    ofs << data;
+    ofs.close();
+
+    cout << "データ書き込み完了" << endl;
+
+    return 0;
 
     // ---- 撮影時の方位角から，抽出する領域を絞り込む ----
 
