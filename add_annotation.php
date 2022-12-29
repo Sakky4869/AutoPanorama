@@ -108,8 +108,8 @@ if($app_config->check_use_login_func() == true){
             </div>
 
             <!-- 撮影ボタン -->
-            <div class="action-button" id="take-button">
-                <!-- <img class="icon" src="./imgs/take_picture_icon.svg" alt=""> -->
+            <div class="action-button" id="take-button" data-take="on">
+                <img class="icon" src="./imgs/take_picture_icon.svg" alt="">
                 <img class="icon" src="./imgs/prohibition.svg" alt="">
                 <p class="icon-text">撮影</p>
             </div>
@@ -124,11 +124,12 @@ if($app_config->check_use_login_func() == true){
 
         <div style="color: white; display: flex; flex-direction: row; justify-content: space-around;">
             <!-- <p class="icon-text">物体認識</p> -->
+            <!-- サーチ機能のON・OFFを切り替えるスイッチ -->
             <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" id="search-switch">
-                <label class="form-check-label" for="search-switch">サーチ</label>
+                <label class="form-check-label" for="search-switch" id="search-switch-text">サーチ</label>
             </div>
-            <!-- <p id="recognition-mode" class="icon-text">　オン</p> -->
+
         </div>
 
         <!-- <div class="progress">

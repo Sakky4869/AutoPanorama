@@ -4,8 +4,6 @@ ini_set('display_erros', 'On');
 require_once(dirname(__FILE__) . '/server_common.php');
 require_once(dirname(__FILE__) . '/app_config.php');
 
-// アプリの設定クラスを初期化
-$app_config = new AppConfig();
 
 // パノラマのオリジナル画像のURLを取得する関数
 // 取得が，クライアントだけでできることがわかったので，実装しない
@@ -13,7 +11,7 @@ $app_config = new AppConfig();
 
 // }
 
-function get_panorama_annotations($panorama_id){
+function get_panorama_annotations($panorama_id, $app_config){
 
     $db_config = new DatabaseConfigPanorama();
 
@@ -47,28 +45,35 @@ function get_panorama_annotations($panorama_id){
 
     $statement->execute();
 
+    // file_put_contents('./logs/log.txt', 'mysql実行' . "\n", FILE_APPEND);
+
     // 結果の配列を作成
     $result = array(
         'result' => true,
         'datas' => array()
     );
 
+
+    // file_put_contents('./logs/log.txt', 'result length: ' . (string)count($statement, COUNT_RECURSIVE) . "\n", FILE_APPEND);
+
     foreach($statement as $row){
 
         $url = $app_config->get_img_save_base_dir() . '/annotation_imgs/' . $row['annotation_id'] . '.jpg';
-        $data = base64_encode(file_get_contents($url));
+        $img_data = base64_encode(file_get_contents($url));
 
         // データを作成
         $data = array(
             'annotation-id' => $row['annotation_id'],
             'theta' => $row['theta'],
             'phi' => $row['phi'],
-            'img' => 'data:image/jpg;base64,' . $data,
+            'img' => 'data:image/jpg;base64,' . $img_data,
         );
 
         // 結果の配列に追加
         array_push($result['datas'], $data);
     }
+
+    // file_put_contents('./logs/log.txt', '結果の配列を作成' . "\n", FILE_APPEND);
 
     // 配列をJSONに変換
     $json = $json_manager->get_json_response($result);
@@ -76,6 +81,9 @@ function get_panorama_annotations($panorama_id){
     // JSONデータを出力
     return $json;
 }
+
+// アプリの設定クラスを初期化
+$app_config = new AppConfig();
 
 // POSTデータの管理クラスを初期化
 $post_manager = new PostManager();
@@ -92,11 +100,18 @@ if($post_manager->check_method_equals('get-annotation-datas')){
     // POSTされたJSONデータを取得
     $json_post = $post_manager->get_json_in_post();
 
+    // file_put_contents('./logs/log.txt', 'get json in post' . "\n", FILE_APPEND);
+
     // JSONデータを配列に変換
     $array_post = $json_manager->get_array_from_json($json_post);
 
+    // file_put_contents('./logs/log.txt', 'get array from json' . "\n", FILE_APPEND);
+
     // アノテーションデータを，データベースから取得
-    $json = get_panorama_annotations($array_post['panorama-id']);
+    $json = get_panorama_annotations($array_post['panorama-id'], $app_config);
+
+    // file_put_contents('./logs/log.txt', 'get annotations' . "\n", FILE_APPEND);
+
 
     // アノテーションデータを返す
     header( "Content-Type: application/json; charset=utf-8");

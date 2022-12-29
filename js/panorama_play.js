@@ -78,7 +78,7 @@ function getAnnotationDatas(panoramaID) {
             resolve(response);
 
         }).fail(function (response) {
-
+            console.log('get annotation datas error:', response);
             reject();
 
         });

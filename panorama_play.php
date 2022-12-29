@@ -152,13 +152,18 @@ if($app_config->check_use_login_func() == true){
 
             ?>
 
+            // console.log('after get panorama img data');
+
             // パノラマ画像のURLを取得
             let panoramaOriginUrl = "data:image/jpeg;base64,<?php echo $img; ?>";
 
             // console.log('panorama url', panoramaOriginUrl);
 
+            console.log('panorama id:', panoramaID);
+
             // アノテーションデータを取得
             let annotationDatas = await getAnnotationDatas(panoramaID);
+
             // console.log(annotationDatas);
 
             // パノラマ空間の初期化

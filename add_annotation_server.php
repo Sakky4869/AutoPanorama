@@ -2,6 +2,7 @@
 
 require_once(dirname(__FILE__) . '/server_common.php');
 require_once(dirname(__FILE__) . '/app_config.php');
+require_once(dirname(__FILE__) . '/flask_api_interface.php');
 
 // アプリの設定クラスを初期化
 $app_config = new AppConfig();
@@ -13,24 +14,43 @@ function add_annotation($data)
 
     // $annotation_id = '2022-09-18_17-33-00';
     $annotation_id = $data['annotation-id'];
-    $annotation_base64_jpeg = $data['annotation'];
+    // $annotation_base64_jpeg = $data['annotation'];
     // $panorama_id = '2022-09-18_17-33-00';
     $panorama_id = $data['panorama-id'];
+    $object_name = $data['object-name'];
+    $object_name = 'Kettle';
+    $annotation_img_temp_id = $data['annotation-img-temp-id'];
+    $annotation_img_temp_id = '2022-12-22_16-17-24_0001';
+
     // $direction = $data['direction'];
+
+    // APIに送信するデータを作成
+    $data = array(
+        'input_word' => $object_name,
+        'annotation_img_temp_id' => $annotation_img_temp_id,
+        'panorama_id' => $panorama_id,
+        'annotation_id' => $annotation_id
+    );
+
+    // APIにリクエストを送信
+    $res = send_request_to_flask_api('/detect_object_position', $data);
 
 
     // file_put_contents('./logs/log.txt', 'データ pano: ' . $panorama_id . ' anno: ' . $annotation_id . ' angle: ' . $direction . "\n", FILE_APPEND);
 
-    $img_path =  './annotation_imgs/' . $annotation_id . '.jpg';
+    // 位置推定システムをAPI化したため，コメントアウト
+    // $img_path =  './annotation_imgs/' . $annotation_id . '.jpg';
+
     // $dir_name = './candidate_imgs/' . $panorama_id . '/' . $annotation_id + '/';
     // $dir_name = '../../panorama_images/candidate_imgs/' . $panorama_id . '/' . $annotation_id + '/';
 
-    file_put_contents($img_path, base64_decode($annotation_base64_jpeg));
+    // 物体名称の取得はできている前提で進めるため，コメントアウト
+    // file_put_contents($img_path, base64_decode($annotation_base64_jpeg));
 
     // -- このタイミングで画像処理プログラムを非同期実行する ----
-    exec('./image_process ' . $panorama_id . ' ' . $annotation_id . ' ' . $direction . ' > /dev/null &');
+    // exec('./image_process ' . $panorama_id . ' ' . $annotation_id . ' ' . $direction . ' > /dev/null &');
 
-    file_put_contents('./logs/log.txt', '画像処理プログラム開始' . "\n", FILE_APPEND);
+    // file_put_contents('./logs/log.txt', '画像処理プログラム開始' . "\n", FILE_APPEND);
     // 画像処理システムが未構築のため，臨時データをreturn
     // $ret = array(
     //     'annotation-id' => $annotation_id,
@@ -49,7 +69,8 @@ function add_annotation($data)
     // );
 
     $ret = array(
-        'result' => 'true'
+        'result' => 'true',
+        'detect-result' => $res
     );
 
     $json_manager = new JsonManager();
@@ -95,8 +116,6 @@ function upload_annotation_temp($data, $app_config){
         }
     }
 
-    // file_put_contents('./logs/log.txt', '一時画像のファイル数：' . (string)$temp_img_count . "\n", FILE_APPEND);
-
     //　画像のファイル名
     $img_path =  $img_base_dir . '/annotation_imgs_temp/' . $annotation_id . '_' . sprintf("%'.04d", $temp_img_count) . '.jpg';
 
@@ -104,46 +123,31 @@ function upload_annotation_temp($data, $app_config){
 
     file_put_contents($img_path, base64_decode($annotation_base64_jpeg));
 
+    // 物体検出を行うファイル名を構築
+    $annotation_img_temp_id = $annotation_id . '_' . sprintf("%'.04d", $temp_img_count);// . '.jpg';
+    // $annotation_img_temp_id = '2022-12-22_16-17-24_0002.jpg';
+
+    // APIに送信するデータを作成
+    $data = array(
+        'annotation_img_temp_id' => $annotation_img_temp_id
+    );
+
+    // APIにリクエストを送信
+    $res = send_request_to_flask_api('/detect_annotation_objects', $data);
+
+    // file_put_contents('./logs/log.txt', '一時画像のファイル数：' . (string)$temp_img_count . "\n", FILE_APPEND);
+
+
     // file_put_contents('./logs/log.txt', '一時画像保存完了：' . $img_path . "\n", FILE_APPEND);
-
-    $output = null;
-    // ---- 撮影画像から物体を認識する ----
-    // $command = 'export GOOGLE_APPLICATION_CREDENTIALS="/home/sakai/AutoPanorama_img_proc/savvy-webbing-368209-93035ab18f3a.json" && '
-    //             . $img_base_dir . '/run_detect_annotaton_objects.sh ' . $img_path;
-
-    putenv('GOOGLE_APPLICATION_CREDENTIALS=/home/sakai/AutoPanorama_img_proc/savvy-webbing-368209-93035ab18f3a.json');
-    // putenv('GOOGLE_APPLICATION_CREDENTIALS="/home/sakai/AutoPanorama_img_proc/savvy-webbing-368209-93035ab18f3a.json"');
-    $command = $img_base_dir . '/run_detect_annotation_objects.sh ' . $img_path . ' 2>&1';
-
-    // file_put_contents('./logs/log.txt', 'ENV GOOGLE_APPLICATION_CREDENTIALS：' . getenv('GOOGLE_APPLICATION_CREDENTIALS') . "\n", FILE_APPEND);
-
-    // file_put_contents('./logs/log.txt', 'command: ' . $command . "\n", FILE_APPEND);
-
-    // exec($command . ' >> ./logs/log.txt', $output, $retval);
-    exec($command, $output, $retval);
-
-    // exec('echo test >> ./logs/log.txt');
-
-    // file_put_contents('./logs/log.txt', 'retval：' . $retval . "\n", FILE_APPEND);
-
-    // file_put_contents('./logs/log.txt', 'outputの長さ：' . count($output) . "\n", FILE_APPEND);
-
-    // file_put_contents('./logs/log.txt', 'output：' . $output[0] . "\n", FILE_APPEND);
 
     $json_manager = new JsonManager();
 
     // 物体画像の認識結果をJSON文字列で受け取る
-    $result_detect_annotation_object_str = $output[0];
+    // $result_detect_annotation_object_str = $output[0];
+    $result_detect_annotation_object_str = $res;
 
     // JSON配列に変換
     $result_detect_annotation_object = $json_manager->get_array_from_json($result_detect_annotation_object_str);
-
-    // foreach($output as $key => $value){
-
-    //     file_put_contents('./logs/log.txt', $key . '：' . $value . "\n", FILE_APPEND);
-    // }
-
-    // file_put_contents('./logs/log.txt', '物体認識の結果：' . var_dump($output) . "\n", FILE_APPEND);
 
     $ret = array(
         'result' => 'success',
@@ -342,7 +346,7 @@ if($post_manager->check_method_equals('decide-annotation')){
 if($post_manager->check_method_equals('check-image-progress')){
 
 
-    file_put_contents('./logs/log.txt', 'request : check-image-progress' . "\n", FILE_APPEND);
+    // file_put_contents('./logs/log.txt', 'request : check-image-progress' . "\n", FILE_APPEND);
 
     $json_ret = check_image_progress($json_array);
 }
@@ -351,7 +355,7 @@ if($post_manager->check_method_equals('check-image-progress')){
 if($post_manager->check_method_equals('get-annotation-datas')){
 
 
-    file_put_contents('./logs/log.txt', 'request : get-annotation-datas' . "\n", FILE_APPEND);
+    // file_put_contents('./logs/log.txt', 'request : get-annotation-datas' . "\n", FILE_APPEND);
 
     $json_ret = get_annotation_datas($json_array);
 }
