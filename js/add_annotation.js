@@ -383,6 +383,8 @@ function uploadAnnotation(objectName, annotationID, annotationImgTempId) {
         'annotation-img-temp-id': annotationImgTempId
     };
 
+    // console.log('add-annotation temp id:', annotationImgTempId);
+
     $.ajax({
         type: 'POST',
         url: './add_annotation_server.php',
@@ -390,6 +392,16 @@ function uploadAnnotation(objectName, annotationID, annotationImgTempId) {
         dataType: 'json',
         contentType: 'application/json',
         success: function (response) {
+
+            console.log(response);
+
+            if(response['detect-result']['result'] == 'ok'){
+                $('#accept-annotation-mark-area').css('display', 'flex');
+                setTimeout(function(){
+                    window.location.href = './panorama_play.php?panorama-id=' + panoramaID;
+                }, 1.5 * 1000);
+            }
+
             // console.log(response);
             // start_wait_image_process();
         }
@@ -427,6 +439,7 @@ function uploadAnnotationTemp(annotation, annotationID) {
 
             // アノテーションの一時画像のIDを保存
             currentAnnotationImgTempId = response['detect-result']['annotation_img_temp_id'];
+            console.log('temp id:', currentAnnotationImgTempId);
             // start_wait_image_process();
         }
     });

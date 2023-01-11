@@ -15,7 +15,7 @@ if($app_config->check_use_login_func() == false){
 if( $session_manager->check_session_has_key('ID')  == true){
 
     // パノラマプレビュー画面にリダイレクト
-    $session_manager->redirect_to('./panorama_preview.php');
+    $session_manager->redirect_to('./panorama_preview.php?page=1');
 }else{
     // ログイン画面にリダイレクト
     // 現状はログイン画面を作成していないので，コメントアウト

@@ -117,8 +117,39 @@ $panorama_datas = get_panorama_datas();
         <div id="content-box">
 
     <?php
+        // 取得したパノラマデータのうち，表示する範囲を計算する
+
+        // パノラマ画像の総数
+        $all_panorama_count = count($panorama_datas);
+
+        // １ページあたりの画像数
+        $panorama_count_per_page = 5;
+
+        // ページの総数を計算
+        $div_value = (int)($all_panorama_count / $panorama_count_per_page);
+        if($all_panorama_count % $panorama_count_per_page != 0) $div_value++;
+
+        $all_page_count = $div_value;
+
+        // GETクエリから，ページ番号を取得
+        // GETクエリのページ番号のデータがある場合
+        $page = 1;
+        if(isset($_GET['page'])){
+            $page = (int)$_GET['page'];
+        }
+        // ページ番号のデータがない場合
+        else{
+            $page = 1;
+        }
+
+        // １ページあたりの画像数とページ番号から，表示範囲を計算
+        $start_index = ($page - 1) * $panorama_count_per_page;
+        $end_index = $page * $panorama_count_per_page - 1;
+        // 表示範囲の終わりがデータ数を超えていたら，戻す
+        if($end_index >= $all_panorama_count) $end_index = $all_panorama_count - 1;
+
         // 取得したパノラマデータに対して実行
-        for($i = 0; $i < count($panorama_datas); $i++){
+        for($i = $start_index; $i <= $end_index; $i++){
             $panorama = $panorama_datas[$i];
             $panorama_id = $panorama['panorama_id'];
             $panorama_name = $panorama['panorama_name'];
@@ -146,8 +177,45 @@ $panorama_datas = get_panorama_datas();
     <?php
         }
     ?>
-        </div>
+        <!-- ページナビゲーションを表示 -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
 
+                <!-- 前のページへのボタン -->
+                <!-- ページ番号が1のときは無効化，それ以外は有効化 -->
+                <li class="page-item <?php echo ($page == 1) ? "disabled" : ""; ?>">
+                    <a class="page-link" href="./panorama_preview.php?page=<?php echo $page - 1; ?>" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+
+                <!-- ページアイテムを生成 -->
+            <?php
+                for($index = 1; $index <= $all_page_count; $index++){
+            ?>
+                <li class="page-item <?php echo ($index == $page) ? "active" : ""; ?>" aria-current="page">
+                    <a class="page-link" href="./panorama_preview.php?page=<?php echo $index; ?>">
+                        <?php echo $index; ?>
+                    </a>
+                </li>
+            <?php
+                }
+            ?>
+
+                <!-- <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li> -->
+
+                <!-- 次のページへのボタン -->
+                <!-- ページ番号がページの総数と一致しているときは無効化，それ以外は有効化 -->
+                <li class="page-item <?php echo ($page == $all_page_count) ? "disabled" : ""; ?>">
+                    <a class="page-link" href="./panorama_preview.php?page=<?php echo $page + 1; ?>" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        </div>
     </div>
 
 
@@ -159,6 +227,8 @@ $panorama_datas = get_panorama_datas();
 
     <script>
         $(document).ready(function () {
+
+            console.log('page:', <?php echo $page; ?>, 'all page:', <?php echo $all_page_count; ?>);
 
             // 詳細画像をタップしたときの処理
             $('.preview-card').click(function (e) {

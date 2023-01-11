@@ -18,9 +18,9 @@ function add_annotation($data)
     // $panorama_id = '2022-09-18_17-33-00';
     $panorama_id = $data['panorama-id'];
     $object_name = $data['object-name'];
-    $object_name = 'Kettle';
+    // $object_name = 'Kettle';
     $annotation_img_temp_id = $data['annotation-img-temp-id'];
-    $annotation_img_temp_id = '2022-12-22_16-17-24_0001';
+    // $annotation_img_temp_id = '2022-12-22_16-17-24_0001';
 
     // $direction = $data['direction'];
 
@@ -67,13 +67,16 @@ function add_annotation($data)
     //         array('index' => 9, 'url' =>  './candidate_imgs/2022-09-18_17-33-00/2022-09-18_17-33-00', 'theta' => 1.87, 'phi' => 3.10),
     //     )
     // );
+    $json_manager = new JsonManager();
+
+    $res_array = $json_manager->get_array_from_json($res);
 
     $ret = array(
         'result' => 'true',
-        'detect-result' => $res
+        // 'detect-result' => $res
+        'detect-result' => $res_array
     );
 
-    $json_manager = new JsonManager();
 
     $json = $json_manager->get_json_response($ret);
 
@@ -151,7 +154,8 @@ function upload_annotation_temp($data, $app_config){
 
     $ret = array(
         'result' => 'success',
-        'detect-result' => $result_detect_annotation_object
+        'detect-result' => $result_detect_annotation_object,
+        'annotation-img-temp-id' => $annotation_img_temp_id
     );
 
     $json = $json_manager->get_json_response($ret);
