@@ -1,6 +1,6 @@
 import MySQLdb
 
-def upload_annotation_data(connection, annotation_id, theta, phi, panorama_id):
+def upload_annotation_data(annotation_id, theta, phi, panorama_id):
     """アノテーションデータをデータベースにアップロードする
 
     Args:
@@ -11,12 +11,24 @@ def upload_annotation_data(connection, annotation_id, theta, phi, panorama_id):
         panorama_id (string): パノラマID
     """
 
+    # MySQLに接続
+    connection = MySQLdb.connect(
+        host='localhost',
+        user='sakai',
+        password='tyoshino',
+        db='sakai',
+        use_unicode=True,
+        charset='utf8'
+    )
+
     cursor = connection.cursor()
 
     try:
 
         # すでにannotation_idとpanorama_idが一致するデータが存在するか確認
         sql = 'select count(*) from  annotation where annotation_id=%s and panorama_id=%s;'
+
+        # print('annotation_id {}, panorama_id: {}'.format(annotation_id, panorama_id))
 
         values = (annotation_id, panorama_id)
 

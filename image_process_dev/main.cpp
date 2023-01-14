@@ -24,8 +24,8 @@ using namespace std;
 using namespace cv;
 using json = nlohmann::json;
 
-// #define USE_DB 1
-#define USE_DB 0
+#define USE_DB 1
+// #define USE_DB 0
 // #define CREATE_POSITION_MAP 1
 #define CREATE_POSITION_MAP 0
 
@@ -39,14 +39,14 @@ using json = nlohmann::json;
  *  php ./update_detect_progress.php upload-result panorama_id annotation_id result_str
  */
 
-vector<string> split_str(string str){
+vector<string> split_str(string str, char delimiter){
 
     vector<string> split_data;
     string temp = "";
 
     for (int i = 0; i < str.size(); i++)
     {
-        if(str[i] == '='){
+        if(str[i] == delimiter){
             split_data.push_back(temp);
             temp = "";
         }else{
@@ -90,7 +90,7 @@ int get_commandline_params(vector<string> args, map<string, string> &param_str, 
         string arg = args[i];
 
         // keyとvalueのvectorに変換
-        vector<string> split_data = split_str(arg);
+        vector<string> split_data = split_str(arg, '=');
 
         string key = split_data[0];
         string value = split_data[1];
@@ -151,6 +151,13 @@ int main(int argc, char *argv[])
     // const string annotation_id = argv[2];
     const string annotation_id = param_str["annotation_id"];
 
+    // ---- 物体領域の取得結果をデータベースにアップ ----
+    // Selective Searchのパラメータ調整を行い，すでに領域データのJSONファイルを作成済みなので，
+    // このタイミングでアップロードを行う
+    // send_region_datas(panorama_id);
+
+    // return 0;
+
     const int total_progress_count = 28;
     int progress_count = 0;
 
@@ -173,7 +180,6 @@ int main(int argc, char *argv[])
 
     write_log("anotation file: " + annotation_file_name);
 
-    // cout << "annotation file: " << annotation_file_name << endl;
     // debugl("annotation file: " + annotation_file_name);
     // パノラマのファイル名
     // const string panorama_file_name = get_file_path("panorama_lab_exp_02.jpg");
@@ -182,6 +188,9 @@ int main(int argc, char *argv[])
 
 
     // cout << "panorama file: " << panorama_file_name << endl;
+    // cout << "annotation file: " << annotation_file_name << endl;
+
+    // return 0;
     // debugl("panorama file: " + panorama_file_name);
 
     // ---- パノラマ画像とアノテーション画像を読み込んで，前処理 ----
@@ -189,21 +198,21 @@ int main(int argc, char *argv[])
     // アノテーションファイル読み込み
     Mat annotation_img;// = imread(annotation_file_name);
     try{
-        annotation_img = imread(annotation_file_name);
-        write_log("アノテーションファイル読み込み完了");
+        // annotation_img = imread(annotation_file_name);
+        // write_log("アノテーションファイル読み込み完了");
     }catch(cv::Exception &e){
         // write_log(e.err);
         // write_log(e.msg);
-        write_log_opencv("imread" + annotation_file_name + " at 96");
+        // write_log_opencv("imread" + annotation_file_name + " at 96");
     }
     // Mat
 
-    imwrite("output_img/annotation_img.jpg", annotation_img);
+    // imwrite("output_img/annotation_img.jpg", annotation_img);
     // cout << "アノテーションファイル読み込み完了" << endl;
     // cout << "annotation width: " << annotation_img.cols << ", height: " << annotation_img.rows << endl;
     // debugl("アノテーションファイル読み込み完了");
-    write_log("アノテーションファイル読み込み完了");
-    write_log("annotation width: " + to_string(annotation_img.cols) + " height: " + to_string(annotation_img.rows));
+    // write_log("アノテーションファイル読み込み完了");
+    // write_log("annotation width: " + to_string(annotation_img.cols) + " height: " + to_string(annotation_img.rows));
 
     // パノラマファイル読み込み
     Mat panorama_img;// = imread(panorama_file_name);
@@ -233,7 +242,12 @@ int main(int argc, char *argv[])
     // Faceのリスト
     map<string, Mat> faces;
 
-    vector<string> face_names = {"front", "right", "back", "left", "top", "bottom"};
+    // 2023/01/09
+    // bottomとtopに無駄が出るので，実行時の引数で対象のfaceを限定することにした
+    string target_face_names = param_str["target_face_names"];
+
+    // vector<string> face_names = {"front", "right", "back", "left", "top", "bottom"};
+    vector<string> face_names = split_str(target_face_names, '_');
 
     // キューブマップ作成
     try{
@@ -253,9 +267,6 @@ int main(int argc, char *argv[])
         // write_log(e.msg);
         write_log_opencv("convert panorama to cubemap at 150");
     }
-
-    imwrite("output_img/cubemap.jpg", cubemap);
-
 
 #if CREATE_POSITION_MAP == 0
 
@@ -299,7 +310,7 @@ int main(int argc, char *argv[])
     string extract_area_mode = param_str["ss_mode"];
 
     // 保存するディレクトリの名前をセット
-    string dir_name_base = "output_img/" + extract_area_mode;
+    string dir_name_base = get_application_dir() + "output_img/" + extract_area_mode;
 
 
     // Selective Searchのディレクトリ名に，mindistの情報を追加
@@ -311,9 +322,9 @@ int main(int argc, char *argv[])
 
     if(stat(dir_name_base.c_str(), &statbuf) != 0){
         if(mkdir(dir_name_base.c_str(), 0777) == 0){
-            cout << dir_name_base << " success to create" << endl;
+            // cout << dir_name_base << " success to create" << endl;
         }else{
-            cout << dir_name_base << " failed to create" << endl;
+            // cout << dir_name_base << " failed to create" << endl;
         }
     }
 
@@ -331,11 +342,18 @@ int main(int argc, char *argv[])
     // ディレクトリが存在しない場合
     if(stat(dir_name_base.c_str(), &statbuf) != 0){
         if(mkdir(dir_name_base.c_str(), 0777) == 0){
-            cout << dir_name_base << " success to create" << endl;
+            // cout << dir_name_base << " success to create" << endl;
         }else{
-            cout << dir_name_base << " failed to create" << endl;
+            // cout << dir_name_base << " failed to create" << endl;
         }
     }
+
+    string cubemap_file_name = get_application_dir() + "output_img/selective_search/" + panorama_id + "/cubemap.jpg";
+    imwrite(cubemap_file_name, cubemap);
+
+    cout << "save cubemap to " << cubemap_file_name << endl;
+
+    // return 0;
 
     long all_img_count = 0;
 
@@ -392,7 +410,7 @@ int main(int argc, char *argv[])
     //     }
     // }
 
-    cout << "nms threshold: " << nms_threshold << endl;
+    // cout << "nms threshold: " << nms_threshold << endl;
 
     // Selevtive SearchとNon-Maximum Suppresionのパラメータについては，以下を参照
     // Notion: https://www.notion.so/d1de2a8fe593484ba08ad64f280b04d8
@@ -436,7 +454,7 @@ int main(int argc, char *argv[])
         // ファイル名作成
         // string face_file_name = dir_name_base + "/" + face_name + "/" + face_name + ".jpg";
         // string face_file_name = dir_name_base + "/" + face_name + ".jpg";
-        string face_file_name = dir_name_base + "/" + face_name + ".png";
+        string face_file_name = dir_name_base + "/" + face_name + ".jpg";
 
 
         // Faceを書き出し
@@ -549,11 +567,11 @@ int main(int argc, char *argv[])
             // cout << "selective search areas count: " << count << endl;
 
             // string file_name = dir_name_base + "/" + face_name +  "_searched.jpg";
-            string file_name = dir_name_base + "/" + face_name +  "_searched.png";
+            string file_name = dir_name_base + "/" + face_name +  "_searched.jpg";
 
             imwrite(file_name, face_export);
 
-            cout << "write " << file_name << endl;
+            // cout << "write " << file_name << endl;
 
         }else{
 
@@ -619,24 +637,24 @@ int main(int argc, char *argv[])
     // ---- JSONファイルに保存 ----
 
     // JSON文字列に書き出し
-    // string object_region_json_str = object_region_json.dump();
+    string object_region_json_str = object_region_json.dump();
 
     // JSONファイルへ書き出し
-    // ofstream ofs("output_file/" + panorama_id + ".json");
-    // ofs << object_region_json_str;
-    // ofs.close();
+    ofstream ofs(get_application_dir() + "output_file/" + panorama_id + ".json");
+    ofs << object_region_json_str;
+    ofs.close();
 
     cout << "write object region" << endl;
 
-    // 物体領域の取得結果をデータベースにアップ
+    // ---- 物体領域の取得結果をデータベースにアップ ----
     // send_region_datas(panorama_id, object_region_json_str);
     // 現在はこちらを使用
     // 画像処理システムのディレクトリを変えたので，動作確認のためコメントアウト
-    // send_region_datas(panorama_id);
+    send_region_datas(panorama_id);
 
     for (int i = 0; i < 5; i++)
     {
-        cout << endl;
+        // cout << endl;
     }
 
 
@@ -687,13 +705,13 @@ int main(int argc, char *argv[])
         }
     }
 
-    cout << "データ書き込み開始" << endl;
+    // cout << "データ書き込み開始" << endl;
 
-    ofstream ofs("pos_map.csv");
-    ofs << data;
-    ofs.close();
+    // ofstream ofs("pos_map.csv");
+    // ofs << data;
+    // ofs.close();
 
-    cout << "データ書き込み完了" << endl;
+    // cout << "データ書き込み完了" << endl;
 
     return 0;
 

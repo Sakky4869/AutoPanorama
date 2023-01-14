@@ -20,7 +20,18 @@ def search_object_in_cubemap(input_word, object_name_list, object_name_and_posit
 
 
 
-def get_word_data_from_db(connection):
+def get_word_data_from_db():
+
+
+    # MySQLに接続
+    connection = MySQLdb.connect(
+        host='localhost',
+        user='sakai',
+        password='tyoshino',
+        db='sakai',
+        use_unicode=True,
+        charset='utf8'
+    )
 
     cursor = connection.cursor()
 
@@ -88,6 +99,10 @@ def get_word_data_from_db(connection):
             #               )
     except MySQLdb.Error as e:
         print('MySQLdb.Error: ', e)
+
+    finally:
+        cursor.close()
+        connection.close()
 
     # 重複を除く
     obj_name_list = list(set(obj_name_list))

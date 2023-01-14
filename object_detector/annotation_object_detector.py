@@ -13,24 +13,36 @@ def detect_annotation_objects(file_path, client, width, height):
         list: 物体名称とその座標データ
     """
 
+    # まず，文字検出を行い，検出できたらそれをデータとする
+    # 検出されなかった場合，オブジェクト検出
+
     # Vision APIを使って物体名称のデータを取得
     objects = vision_api_interface.get_objects_in_image(file_path, client)
+
+    # 文字かオブジェクトか，種類を取得
+    data_type = objects['type']
 
     # 本システムに使いやすい形に変換
     object_data = []
 
-    for obj in objects:
+    for obj in objects['data']:
 
-        obj_name = obj.name
-
-        vertices = obj.bounding_poly.normalized_vertices
-
+        obj_name = ''
         vertices_int = []
 
-        for vertice in vertices:
-            vertices_int.append([
-                int(vertice.x * width), int(vertice.y * height)
-            ])
+        if(data_type == 'object'):
+
+            obj_name = obj.name
+            vertices = obj.bounding_poly.normalized_vertices
+            for vertice in vertices:
+                vertices_int.append([
+                    int(vertice.x * width), int(vertice.y * height)
+                ])
+
+        elif(data_type == 'text'):
+
+            obj_name = obj.description
+            vertices_int = [[vertice.x, vertice.y] for vertice in obj.bounding_poly.vertices]
 
         # cv2.rectangle(mat,
         #               (vertices_int[0][0], vertices_int[0][1]),

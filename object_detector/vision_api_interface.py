@@ -28,5 +28,12 @@ def get_objects_in_image(file_path, client):
     # for label in labels:
     #     print(label.description)
 
+    # 文字検出
+    # texts = client.text_detection(image=image).text_annotations
+
+    # if(len(texts) != 0):
+    #     return {'type': 'text', 'data': texts}
+
     # オブジェクト検出　これで１ユニット消費
-    return client.object_localization(image=image).localized_object_annotations
+    objects = client.object_localization(image=image).localized_object_annotations
+    return {'type': 'object', 'data': objects}

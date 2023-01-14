@@ -5,7 +5,7 @@ using namespace std;
 
 void write_log(string data){
 
-    ofstream ofs("./logs/image_process_log.txt", ios::app);
+    ofstream ofs("/home/sakai/AutoPanorama_img_proc/logs/image_process_log.txt", ios::app);
 
     time_t now = time(NULL);
     tm *pnow = localtime(&now);

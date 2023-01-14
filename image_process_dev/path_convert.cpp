@@ -4,7 +4,8 @@ using namespace std;
 
 string get_application_dir(){
     // return "../";
-    return "./";
+    // return "./";
+    return "/home/sakai/AutoPanorama_img_proc/";
 }
 
 string get_panorama_path(string panorama_id){
