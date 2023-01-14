@@ -150,6 +150,35 @@ function showErrorMessage(msg, optMsg) {
     $('#message-window').css('display', 'inline');
 }
 
+function check_object_detector_api_status(panoramaID){
+
+    let data = {
+        'method': 'check-object-detector-api-status',
+    };
+
+    // console.log('add-annotation temp id:', annotationImgTempId);
+
+    $.ajax({
+        type: 'POST',
+        url: './panorama_play_server.php',
+        data: JSON.stringify(data),
+        dataType: 'json',
+        contentType: 'application/json',
+        success: function (response) {
+
+            let status = response['status'];
+
+            // APIが稼働中の場合
+            if(status == 'running'){
+                redirectToAnnotationPage(panoramaID);
+            }else if(status == 'stopped'){
+                alert('APIが停止中です．');
+            }
+        }
+    });
+}
+
+
 /**
  * パノラマIDをクエリに付与し，アノテーション追加画面へリダイレクトする
  * @param {string} panoramaID パノラマID

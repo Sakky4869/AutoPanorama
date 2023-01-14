@@ -82,6 +82,49 @@ function get_panorama_annotations($panorama_id, $app_config){
     return $json;
 }
 
+function check_object_detector_api_status(){
+
+    $db_config = new DatabaseConfigPanorama();
+
+    $json_manager = new JsonManager();
+
+    $pdo = $db_config->connect_db();
+
+    if($pdo == null){
+
+        $data = array(
+            'result' => true,
+            'message' => 'データベースに接続できませんでした'
+        );
+
+        $ret = $json_manager->get_json_response($data);
+
+        header( "Content-Type: application/json; charset=utf-8");
+        echo $ret;
+        exit();
+    }
+
+    // app_configのテーブルからAPIのステータスを取得
+    $sql = 'select config_value from app_config where config_key="object_detector_api_status";';
+
+    $statement = $pdo->query($sql);
+
+    $data = $statement->fetchAll();
+
+    // 結果の配列を作成
+    $result = array(
+        'result' => true,
+        'status' => $data[0]['config_value']
+    );
+
+    // 配列をJSONに変換
+    $json = $json_manager->get_json_response($result);
+
+    // JSONデータを出力
+    return $json;
+
+}
+
 // アプリの設定クラスを初期化
 $app_config = new AppConfig();
 
@@ -112,6 +155,17 @@ if($post_manager->check_method_equals('get-annotation-datas')){
 
     // file_put_contents('./logs/log.txt', 'get annotations' . "\n", FILE_APPEND);
 
+
+    // アノテーションデータを返す
+    header( "Content-Type: application/json; charset=utf-8");
+    echo $json;
+
+}
+
+// 物体検出や位置推定を行うAPIの稼働状況を要求された場合
+else if($post_manager->check_method_equals('check-object-detector-api-status')){
+
+    $json = check_object_detector_api_status();
 
     // アノテーションデータを返す
     header( "Content-Type: application/json; charset=utf-8");

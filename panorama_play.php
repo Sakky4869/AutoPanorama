@@ -174,7 +174,8 @@ if($app_config->check_use_login_func() == true){
 
             // ボタンを押したらアノテーション追加画面へ移動
             $('#add-annotation-button').click(function(event){
-                redirectToAnnotationPage(panoramaID);
+                check_object_detector_api_status(panoramaID);
+                // redirectToAnnotationPage(panoramaID);
             });
 
         });
