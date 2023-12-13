@@ -12,10 +12,10 @@
 
 ![image](https://github.com/Sakky4869/AutoPanorama/assets/45997787/a6c59d42-8665-422e-a352-15af63774434)
 
+### システムの利用フロー
 
-|探索対象の物体の画像|アノテーションを付与した様子|詳細情報|
-|---|---|---|
-|![image](https://github.com/Sakky4869/AutoPanorama/assets/45997787/8cc51506-236f-440c-8b72-09b8ff9dc032)|![image](https://github.com/Sakky4869/AutoPanorama/assets/45997787/6362b3d8-6091-406d-90ae-1e3b9ff0330d)|![image](https://github.com/Sakky4869/AutoPanorama/assets/45997787/4436948a-b58e-42c0-8238-94d6b8cb47a7)|
+![system_flow_screen](https://github.com/Sakky4869/AutoPanorama/assets/45997787/35ff7223-fae6-4567-86b9-8f0714e934d8)
+
 
 ## ブランチ
 
@@ -59,5 +59,9 @@
 - 下記リンクに画像として出力しています
     - https://drive.google.com/drive/folders/1C0Xm7jGvMrru0KVyiiMBycYGgtOJE4WS?usp=drive_link
 
+## 工夫した点
+
+- Webアプリケーションで物体の画像を撮影してから結果が表示されるまでに時間がかかっていたため、非同期処理を実装しました
+   - DBにバックグラウンド処理の進捗状況を保存し、その数値を定期的に読み取ることで、処理が完了したタイミングで結果を取得できるようにしました
 
 
