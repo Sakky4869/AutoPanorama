@@ -1,8 +1,8 @@
 # AutoPanorama
 
--【研究】パノラマへのアノテーション半自動化システムの開発用リポジトリ．
-    - アノテーション：パノラマ画像中の特定の物体に対して、説明をするためにマーキングをすること
-- アプリページ：https://grapefruit.sys.wakayama-u.ac.jp/~sakai/AutoPanorama_dev
+* 【研究】パノラマへのアノテーション半自動化システムの開発用リポジトリ．
+    * アノテーション：パノラマ画像中の特定の物体に対して、説明をするためにマーキングをすること
+* アプリページ：https://grapefruit.sys.wakayama-u.ac.jp/~sakai/AutoPanorama_dev
 
 
 ## 概要
